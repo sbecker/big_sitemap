@@ -6,7 +6,6 @@ require 'big_sitemap/builder'
 class BigSitemap
   DEFAULTS = {
     :max_per_sitemap => Builder::MAX_URLS,
-    :batch_size      => 1001, # TODO: Deprecate
     :document_path   => '/',
     :gzip            => true,
 
@@ -16,12 +15,6 @@ class BigSitemap
     :ping_bing   => false,
     :ping_ask    => false
   }
-
-  # TODO: Deprecate
-  COUNT_METHODS     = [:count_for_sitemap, :count]
-  FIND_METHODS      = [:find_for_sitemap, :all]
-  TIMESTAMP_METHODS = [:updated_at, :updated_on, :updated, :created_at, :created_on, :created]
-  PARAM_METHODS     = [:to_param, :id]
 
   class << self
     def generate(options={}, &block)
@@ -77,7 +70,6 @@ class BigSitemap
     Dir.mkdir(@options[:document_full]) unless File.exists?(@options[:document_full])
 
     @sources       = []
-    @models        = []
     @sitemap_files = []
   end
 
@@ -93,34 +85,10 @@ class BigSitemap
     @options[:document_full]
   end
 
-  def add(model, options={})
-    warn 'BigSitemap#add is deprecated.  Please use BigSitemap.generate and call add inside the block (in BigSitemap 1.0.0+).  You will have to perform the find and generate the path for each record yourself.'
-    @models << model
-
-    filename_suffix = @models.count(model) - 1
-
-    options[:path]           ||= table_name(model)
-    options[:filename]       ||= file_name(model)
-    options[:primary_column] ||= 'id' if model.new.respond_to?('id')
-    options[:partial_update]   = @options[:partial_update] && options[:partial_update] != false
-
-    options[:filename] << "_#{filename_suffix}" unless filename_suffix == 0
-
-    @sources << [model, options.dup]
-
-    self
-  end
 
   def add_path(path, options)
     @paths ||= []
     @paths << [path, options]
-    self
-  end
-
-  def add_static(url, time = nil, frequency = nil, priority = nil)
-    warn 'BigSitemap#add_static is deprecated.  Please use BigSitemap#add_path instead'
-    @static_pages ||= []
-    @static_pages << [url, time, frequency, priority]
     self
   end
 
@@ -162,10 +130,6 @@ class BigSitemap
     prepare_update
 
     add_urls
-
-    # TODO: Deprecate
-    generate_models
-    generate_static
 
     generate_sitemap_index
 
@@ -241,109 +205,6 @@ class BigSitemap
   private
 
   # TODO: Deprecate
-  def table_name(model)
-    model.table_name
-  end
-
-  # TODO: Deprecate
-  def generate_models
-    for model, options in @sources
-      with_sitemap(options.dup.merge({:name => model})) do |sitemap|
-        last_id = nil #id of last processed item
-        count_method = pick_method(model, COUNT_METHODS)
-        find_method  = pick_method(model, FIND_METHODS)
-        raise ArgumentError, "#{model} must provide a count_for_sitemap class method" if count_method.nil?
-        raise ArgumentError, "#{model} must provide a find_for_sitemap class method" if find_method.nil?
-
-        find_options = {}
-        [:conditions, :limit, :joins, :select, :order, :include, :group].each do |key|
-          find_options[key] = options.delete(key)
-        end
-
-        primary_method   = options.delete(:primary_column)
-        primary_column   = "#{table_name(model)}.#{primary_method}"
-
-        count = model.send(count_method, find_options.merge(:select => (primary_column || '*'), :include => nil))
-        count = find_options[:limit].to_i if find_options[:limit] && find_options[:limit].to_i < count
-        num_sitemaps = 1
-        num_batches  = 1
-
-        if count > @options[:batch_size]
-          num_batches  = (count.to_f / @options[:batch_size].to_f).ceil
-          num_sitemaps = (count.to_f / @options[:max_per_sitemap].to_f).ceil
-        end
-        batches_per_sitemap = num_batches.to_f / num_sitemaps.to_f
-
-        for sitemap_num in 1..num_sitemaps
-          # Work out the start and end batch numbers for this sitemap
-          batch_num_start = sitemap_num == 1 ? 1 : ((sitemap_num * batches_per_sitemap).ceil - batches_per_sitemap + 1).to_i
-          batch_num_end   = (batch_num_start + [batches_per_sitemap, num_batches].min).floor - 1
-
-          for batch_num in batch_num_start..batch_num_end
-            offset        = (batch_num - 1) * @options[:batch_size]
-            limit         = (count - offset) < @options[:batch_size] ? (count - offset) : @options[:batch_size]
-            find_options.update(:limit => limit, :offset => offset) if num_batches > 1
-
-            if last_id && primary_column
-              find_options.update(:limit => limit, :offset => nil)
-              primary_column_value = escape_if_string last_id #escape '
-              find_options.update(:conditions => [find_options[:conditions], "(#{primary_column} > #{primary_column_value})"].compact.join(' AND '))
-            end
-
-            model.send(find_method, find_options).each do |record|
-              last_mod = options[:last_modified]
-              if last_mod.is_a?(Proc)
-                last_mod = last_mod.call(record)
-              elsif last_mod.nil?
-                last_mod_method = pick_method(record, TIMESTAMP_METHODS)
-                last_mod = last_mod_method.nil? ? Time.now : record.send(last_mod_method)
-              end
-
-              param_method = pick_method(record, PARAM_METHODS)
-
-              location =
-                if options[:location].is_a?(Proc)
-                  options[:location].call(record)
-                else
-                  File.join @options[:base_url], options[:path], record.send(param_method).to_s
-                end
-
-              change_frequency = options[:change_frequency]
-              freq = change_frequency.is_a?(Proc) ? change_frequency.call(record) : change_frequency
-
-              priority = options[:priority]
-              pri = priority.is_a?(Proc) ? priority.call(record) : priority
-
-              last_id = primary_column ? record.send(primary_method) : nil
-
-              sitemap.add_url!(location, {
-                :last_modified    => last_mod,
-                :change_frequency => freq,
-                :priority         => pri,
-                :part_number      => last_id
-              }) if location
-            end
-          end
-        end
-      end
-    end
-    self
-  end
-
-  # TODO: Deprecate
-  def generate_static
-    return self if Array(@static_pages).empty?
-    with_sitemap({:name => 'static', :type => 'static'}) do |sitemap|
-      @static_pages.each do |location, last_mod, freq, pri|
-        sitemap.add_url!(location, {
-          :last_modified    => last_mod,
-          :change_frequency => freq,
-          :priority         => pri
-        })
-      end
-    end
-    self
-  end
 
   # TODO: Deprecate
   def prepare_update
@@ -393,45 +254,8 @@ class BigSitemap
     end
   end
 
-  def pick_method(model, candidates)
-    method = nil
-    candidates.each do |candidate|
-      if model.respond_to? candidate
-        method = candidate
-        break
-      end
-    end
-    method
-  end
-
-  # TODO: Deprecate
-  def escape_if_string(value)
-    (value.to_i.to_s == value.to_s) ?  value.to_i : "'#{value.gsub("'", %q(\\\'))}'"
-  end
-
   def url_for_sitemap(path)
     File.join @options[:base_url], @options[:url_path], File.basename(path)
   end
 
-end
-
-
-class BigSitemapRails < BigSitemap
-  def self.generate(options={}, &block)
-    raise 'No Rails Environment loaded' unless defined? Rails
-
-    DEFAULTS.merge!(:document_root => "#{Rails.root}/public", :url_options => default_url_options)
-    super(options, &block)
-  end
-end
-
-
-class BigSitemapMerb < BigSitemap
-  def self.generate(options={}, &block)
-    raise 'No Merb Environment loaded' unless defined? ::Merb
-    require 'extlib'
-
-    DEFAULTS.merge!(:document_root => "#{Merb.root}/public")
-    super(options, &block)
-  end
 end
