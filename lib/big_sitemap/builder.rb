@@ -15,8 +15,7 @@ class BigSitemap
       @max_urls       = options.delete(:max_urls) || MAX_URLS
       @type           = options.delete(:type)
       @filepaths      = []
-      @parts          = options.delete(:start_part_id) || 0
-      @partial_update = options.delete(:partial_update)
+      @parts          = 0
 
       @filename         = options.delete(:filename)
       @current_filename = nil
@@ -29,7 +28,7 @@ class BigSitemap
     end
 
     def add_url!(location, options={})
-      _rotate(options[:id]) if @max_urls == @urls
+      _rotate() if @max_urls == @urls
       _open_tag 'url'
 
       tag! 'loc', location
@@ -82,10 +81,10 @@ class BigSitemap
       _open_tag name, attrs
     end
 
-    def _rotate(part_nr=nil)
+    def _rotate()
       # write out the current document and start writing into a new file
       close!
-      @parts = part_nr || @parts + 1
+      @parts = @parts + 1
       @target = _get_writer
       _init_document
     end
