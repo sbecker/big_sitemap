@@ -27,8 +27,6 @@ class BigSitemap
     def generate(options={}, &block)
       @sitemap = self.new(options)
 
-      @sitemap.first_id_of_last_sitemap = first_id_of_last_sitemap
-
       instance_eval(&block)
 
       @sitemap.with_lock do
@@ -37,12 +35,6 @@ class BigSitemap
     end
 
     private
-
-    def first_id_of_last_sitemap
-      Dir["#{@sitemap.document_full}sitemap*.{xml,xml.gz}"].map do |file|
-        file.to_s.scan(/sitemap_(.+).xml/).flatten.last.to_i
-      end.sort.last
-    end
 
     def add(path, options={})
       @sitemap.add_path(path, options)
@@ -81,14 +73,6 @@ class BigSitemap
     @sitemap_files = []
   end
 
-  def first_id_of_last_sitemap
-    @first_id_of_last_sitemap
-  end
-
-  def first_id_of_last_sitemap=(first_id)
-    @first_id_of_last_sitemap = first_id
-  end
-
   def document_full
     @options[:document_full]
   end
@@ -102,7 +86,6 @@ class BigSitemap
     options[:path]           ||= table_name(model)
     options[:filename]       ||= file_name(model)
     options[:primary_column] ||= 'id' if model.new.respond_to?('id')
-    options[:partial_update]   = @options[:partial_update] && options[:partial_update] != false
 
     options[:filename] << "_#{filename_suffix}" unless filename_suffix == 0
 
@@ -156,11 +139,7 @@ class BigSitemap
 
   # TODO: Deprecate (move to private)
   def generate(options={})
-    clean unless options[:partial_update]
-
-    # TODO: Ddeprecate
-    prepare_update
-
+    clean
     add_urls
 
     # TODO: Deprecate
@@ -229,13 +208,6 @@ class BigSitemap
     if @options[:ping_ask]
       Net::HTTP.get('submissions.ask.com', "/ping?sitemap=#{sitemap_uri}")
     end
-  end
-
-  # TODO: Deprecate
-  def get_last_id(filename)
-    Dir["#{filename}*.{xml,xml.gz}"].map do |file|
-      file.to_s.scan(/#{filename}_(.+).xml/).flatten.last.to_i
-    end.sort.last
   end
 
   private
@@ -345,18 +317,6 @@ class BigSitemap
     self
   end
 
-  # TODO: Deprecate
-  def prepare_update
-    @files_to_move = []
-    @sources.each do |model, options|
-      if options[:partial_update] && (primary_column = options[:primary_column]) && (last_id = get_last_id(options[:filename]))
-        primary_column_value       = escape_if_string last_id #escape '
-        options[:conditions]       = [options[:conditions], "(#{table_name(model)}.#{primary_column} >= #{primary_column_value})"].compact.join(' AND ')
-        options[:start_part_id]    = last_id
-      end
-    end
-  end
-
   def lock!(lock_file = 'generator.lock')
     lock_file = File.join(@options[:document_full], lock_file)
     File.open(lock_file, 'w', File::EXCL)
@@ -373,8 +333,6 @@ class BigSitemap
     options[:max_urls]       ||= @options["max_per_#{options[:type]}".to_sym]
     options[:gzip]           ||= @options[:gzip]
     options[:indent]         ||= 2
-    options[:partial_update] ||= @options[:partial_update]
-    options[:start_part_id]  ||= first_id_of_last_sitemap
 
     sitemap = if options[:type] == 'index'
       IndexBuilder.new(options)
