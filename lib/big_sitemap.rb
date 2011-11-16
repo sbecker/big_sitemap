@@ -8,46 +8,61 @@ class BigSitemap
     :max_per_sitemap => Builder::MAX_URLS,
     :document_path   => '/',
     :gzip            => true,
+    # :indent        => 2
 
     # Opinionated
-    :ping_google => true,
-    :ping_yahoo  => false, # needs :yahoo_app_id
-    :ping_bing   => false,
-    :ping_ask    => false
+    :ping => [:google]
   }
 
   class << self
     def generate(options={}, &block)
-      @sitemap = self.new(options)
+      self.new(options).tap do |sitemap|
+        sitemap.with_lock do
+          sitemap.clean
 
-      instance_eval(&block)
+          sitemap.add_set do |builder|
+            @builder = builder
+            instance_eval(&block)
+          end
 
-      @sitemap.with_lock do
-        @sitemap.generate(options)
+          url = sitemap.generate_sitemap_index
+          BigSitemap::ping_search_engines(url, options[:ping])
+        end
       end
     end
 
     private
-
     def add(path, options={})
-      @sitemap.add_path(path, options)
+      #url = File.join @options[:base_url], File.basename(path)
+      @builder.add_url! path, options
+    end
+
+    def add_set(options={})
+      options[:filename]       ||= file_name(options[:name])
+
+      klass = options.delete(:type) == 'index' ? IndexBuilder : Builder.
+      klass.new(options)
+
+      begin
+        yield builder
+      ensure
+        builder.close!
+      end
     end
   end
 
   def initialize(options={})
     @options = DEFAULTS.merge options
 
-    if @options[:max_per_sitemap] <= 1
-      raise ArgumentError, '":max_per_sitemap" must be greater than 1'
+    unless (2..Builder::MAX_URLS).member?(@options[:max_per_sitemap])
+      raise ArgumentError, "\":max_per_sitemap\" must be greater than 1 and smaller than #{Builder::MAX_URLS}"
     end
 
-    if @options[:url_options] && !@options[:base_url]
-      @options[:base_url] = URI::Generic.build( {:scheme => "http"}.merge(@options.delete(:url_options)) ).to_s
-    end
-
+    #gets prefixed to url if 'http' is missing
     unless @options[:base_url]
-      raise ArgumentError, 'you must specify either ":url_options" hash or ":base_url" string'
+      raise ArgumentError, 'you must specify either ":base_url" string'
     end
+
     @options[:url_path] ||= @options[:document_path]
 
     unless @options[:document_root]
@@ -61,18 +76,7 @@ class BigSitemap
 
     Dir.mkdir(@options[:document_full]) unless File.exists?(@options[:document_full])
 
-    @sources       = []
     @sitemap_files = []
-  end
-
-  def document_full
-    @options[:document_full]
-  end
-
-  def add_path(path, options)
-    @paths ||= []
-    @paths << [path, options]
-    self
   end
 
   def with_lock
@@ -86,55 +90,26 @@ class BigSitemap
     STDERR.puts 'Lockfile exists' if $VERBOSE
   end
 
-  def file_name(name=nil)
-    name   = table_name(name) unless (name.nil? || name.is_a?(String))
-    prefix = 'sitemap'
-    prefix << '_' unless name.nil?
-    File.join(@options[:document_full], "#{prefix}#{name}")
-  end
-
-  def dir_files
+  def sitemap_files
     File.join(@options[:document_full], "sitemap*.{xml,xml.gz}")
   end
 
+  def url_for_sitemap(path)
+    File.join @options[:base_url], @options[:url_path], File.basename(path)
+  end
+
   def clean
-    Dir[dir_files].each do |file|
+    Dir[sitemap_files].each do |file|
       FileUtils.rm file
     end
 
     self
   end
 
-  # TODO: Deprecate (move to private)
-  def generate(options={})
-    clean
-    add_urls
-
-    generate_sitemap_index
-
-    ping_search_engines
-
-    self
-  end
-
-  def add_urls
-    return self if Array(@paths).empty?
-
-    with_sitemap do |builder|
-      @paths.each do |path, options|
-        url = File.join @options[:base_url], File.basename(path)
-        builder.add_url! url, options
-      end
-    end
-
-    self
-  end
-
   # Create a sitemap index document
-  def generate_sitemap_index(files=nil)
-    files ||= Dir[dir_files]
+  def generate_sitemap_index(files=Dir[sitemap_files])
 
-    with_sitemap({:name => 'index', :type => 'index'}) do |sitemap|
+    add_set(:name => 'index', :type => 'index') do |sitemap|
       for path in files
         next if path =~ /index/
         sitemap.add_url! url_for_sitemap(path), :last_modified => File.stat(path).mtime
@@ -142,36 +117,6 @@ class BigSitemap
     end
 
     self
-  end
-
-  def ping_search_engines
-    require 'net/http'
-    require 'cgi'
-
-    sitemap_uri = CGI::escape(url_for_sitemap(@sitemap_files.last))
-
-    if @options[:ping_google]
-      Net::HTTP.get('www.google.com', "/webmasters/tools/ping?sitemap=#{sitemap_uri}")
-    end
-
-    if @options[:ping_yahoo]
-      if @options[:yahoo_app_id]
-        Net::HTTP.get(
-          'search.yahooapis.com', "/SiteExplorerService/V1/updateNotification?" +
-            "appid=#{@options[:yahoo_app_id]}&url=#{sitemap_uri}"
-        )
-      else
-        STDERR.puts 'unable to ping Yahoo: no ":yahoo_app_id" provided'
-      end
-    end
-
-    if @options[:ping_bing]
-      Net::HTTP.get('www.bing.com', "/webmaster/ping.aspx?siteMap=#{sitemap_uri}")
-    end
-
-    if @options[:ping_ask]
-      Net::HTTP.get('submissions.ask.com', "/ping?sitemap=#{sitemap_uri}")
-    end
   end
 
   private
@@ -185,29 +130,10 @@ class BigSitemap
     FileUtils.rm lock_file
   end
 
-  def with_sitemap(options={})
-    options[:filename]       ||= file_name(options[:name])
-    options[:type]           ||= 'sitemap'
-    options[:max_urls]       ||= @options["max_per_#{options[:type]}".to_sym]
-    options[:gzip]           ||= @options[:gzip]
-    options[:indent]         ||= 2
-
-    sitemap = if options[:type] == 'index'
-      IndexBuilder.new(options)
-    else
-      Builder.new(options)
-    end
-
-    begin
-      yield sitemap
-    ensure
-      sitemap.close!
-      @sitemap_files.concat sitemap.filepaths!
-    end
+  def file_name(name=nil)
+    name   = table_name(name) unless (name.nil? || name.is_a?(String))
+    prefix = 'sitemap'
+    prefix << '_' unless name.nil?
+    File.join(@options[:document_full], "#{prefix}#{name}")
   end
-
-  def url_for_sitemap(path)
-    File.join @options[:base_url], @options[:url_path], File.basename(path)
-  end
-
 end

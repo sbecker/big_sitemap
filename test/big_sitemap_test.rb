@@ -23,24 +23,6 @@ class BigSitemapTest < Test::Unit::TestCase
     assert_equal url, sitemap.instance_variable_get(:@options)[:base_url]
   end
 
-  should 'generate the same base URL with :url_options option' do
-    options = {:document_root => tmp_dir}
-    url = 'http://example.com'
-    sitemap = BigSitemap.new(options.merge(:url_options => {:host => 'example.com'}))
-
-    assert_equal url, sitemap.instance_variable_get(:@options)[:base_url]
-  end
-
-  should 'generate sitemap index file' do
-    generate_sitemap { add '/foo' }
-    assert File.exists? first_sitemap_file
-  end
-
-  should 'generate static file' do
-    generate_sitemap { add '/foo' }
-    assert File.exists? first_sitemap_file
-  end
-
   should 'should add paths' do
     generate_sitemap do
       add '/', {:last_modified => Time.now, :change_frequency => 'weekly', :priority => 0.5}
@@ -59,17 +41,17 @@ class BigSitemapTest < Test::Unit::TestCase
     end
 
     should 'contain one sitemap element' do
-      generate_sitemap { add '/' }  
+      generate_sitemap { add '/' }
       assert_equal 1, num_elements(sitemaps_index_file, 'sitemap')
     end
 
     should 'contain one loc element' do
-      generate_sitemap { add '/' }  
+      generate_sitemap { add '/' }
       assert_equal 1, num_elements(sitemaps_index_file, 'loc')
     end
 
     should 'contain one lastmod element' do
-      generate_sitemap { add '/' }  
+      generate_sitemap { add '/' }
       assert_equal 1, num_elements(sitemaps_index_file, 'lastmod')
     end
 
