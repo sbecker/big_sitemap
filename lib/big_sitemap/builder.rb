@@ -1,142 +1,65 @@
-require 'fileutils'
-require 'zlib'
+
+# writer only has print and puts as interface
 
 class BigSitemap
   class Builder
-    MAX_URLS = 50000
     HEADER_NAME = 'urlset'
     HEADER_ATTRIBUTES = {
       'xmlns' => 'http://www.sitemaps.org/schemas/sitemap/0.9',
       'xmlns:xsi' => "http://www.w3.org/2001/XMLSchema-instance",
       'xsi:schemaLocation' => "http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"
     }
+    OPTS = {
+      :indent_by => 2
+    }
 
-    def initialize(options)
-      @gzip           = options.delete(:gzip)
-      @max_urls       = options.delete(:max_urls) || MAX_URLS
-      @type           = options.delete(:type)
-      @filepaths      = []
-      @parts          = 0
+    def initialize(writer, opts = {}, &block)
+      @opt = OPTS.merge(opts)
+      @writer = writer
+      init!(&block)
+    end
 
-      @filename         = options.delete(:filename)
-      @current_filename = nil
-      @tmp_filename     = nil
-      @target           = _get_writer
-
-      @level = 0
+    def init!(&block) #_init_document
       @opened_tags = []
-      _init_document
+      @writer.print '<?xml version="1.0" encoding="UTF-8"?>'
+      tag! self.class::HEADER_NAME, self.class::HEADER_ATTRIBUTES, &block
     end
 
-    def add_url!(location, options={})
-      _rotate() if @max_urls == @urls
-      _open_tag 'url'
-
-      tag! 'loc', location
-      tag! 'lastmod', options[:last_modified].utc.strftime('%Y-%m-%dT%H:%M:%S+00:00') if options[:last_modified]
-      tag! 'changefreq', options[:change_frequency] || 'weekly'
-      tag! 'priority', options[:priority] if options[:priority]
-
-      _close_tag 'url'
-
-      @urls += 1
-    end
-
-    def filepaths!
-      @filepaths
-    end
-
-    def close!
-      _close_document
-      target!.close if target!.respond_to?(:close)
-      File.delete(@current_filename) if File.exists?(@current_filename)
-      File.rename(@tmp_filename, @current_filename)
-    end
-
-    def target!
-      @target
-    end
-
-    private
-
-    def _get_writer
-      filename = @filename.dup
-      filename << "_#{@parts}" if @parts > 0 && @type != 'index'
-      filename << '.xml'
-      filename << '.gz' if @gzip
-      _open_writer(filename)
-    end
-
-    def _open_writer(filename)
-      @current_filename = filename
-      @tmp_filename     = filename + ".tmp"
-      @filepaths << filename
-      file = ::File.open(@tmp_filename, 'w+:ASCII-8BIT')
-      @gzip ? ::Zlib::GzipWriter.new(file) : file
-    end
-
-    def _init_document
-      @urls = 0
-      target!.print '<?xml version="1.0" encoding="UTF-8"?>'
-      _newline
-      _open_tag self.class::HEADER_NAME, self.class::HEADER_ATTRIBUTES
-    end
-
-    def _rotate()
-      # write out the current document and start writing into a new file
-      close!
-      @parts = @parts + 1
-      @target = _get_writer
-      _init_document
-    end
-
-    # opens a tag, bumps up level but doesn't require a block
-    def _open_tag(name, attrs={})
-      _indent
-      _start_tag(name, attrs)
-      _newline
-      @level += 1
-      @opened_tags << name
-    end
-
-    def _start_tag(name, attrs={})
-      attrs = attrs.map { |attr, value| %Q( #{attr}="#{value}") }.join('')
-      target!.print "<#{name}#{attrs}>"
-    end
-
-    def tag!(name, content, attrs = {})
-      _indent
-      _start_tag(name, attrs)
-      target!.print content.to_s.gsub('&', '&amp;')
-      _end_tag(name)
-      _newline
-    end
-
-    def _end_tag(name)
-      target!.print "</#{name}>"
-    end
-
-    # closes a tag block by decreasing the level and inserting a close tag
-    def _close_tag(name)
-      @opened_tags.pop
-      @level -= 1
-      _indent
-      _end_tag(name)
-      _newline
-    end
-
-    def _close_document
-      for name in @opened_tags.reverse
-        _close_tag(name)
+    def add_url!(location, options = {})
+      tag! 'url' do
+        tag! 'loc', location
+        tag! 'lastmod', options[:last_modified].utc.strftime('%Y-%m-%dT%H:%M:%S+00:00') if options[:last_modified]
+        tag! 'changefreq', options[:change_frequency] if options[:change_frequency]
+        tag! 'priority', options[:priority].to_s if options[:priority]
       end
     end
 
-    def _indent
-      target!.print "  " * @level
+    def tag!(name, content = nil, attrs = {}, &block) # _tag
+      attrs = content if content.is_a? Hash
+      open!(name, attrs)
+      if content.is_a? String
+        @writer.print content.gsub('&', '&amp;')
+        close!(false)
+      else
+        if block
+          instance_eval(&block)
+          close!
+        end
+      end
     end
 
-    def _newline
-      target!.puts ''
+    def open!(name, attrs = {}) #_open_tag
+      attrs = attrs.map { |attr, value| %Q( #{attr}="#{value}") }.join('')
+      @writer.print "\n" + ' ' * @opt[:indent_by] * @opened_tags.size
+      @opened_tags << name
+      @writer.print "<#{name}#{attrs}>"
+    end
+
+    def close!(indent = true) #_close_tag / #_close_document
+      name = @opened_tags.pop
+      @writer.print "\n" + ' ' * @opt[:indent_by] * @opened_tags.size if indent
+      @writer.print "</#{name}>"
+      #TODO close writer if none opened_tags left??
     end
   end
 
@@ -147,14 +70,29 @@ class BigSitemap
     }
 
     def add_url!(location, options={})
-      _open_tag 'sitemap'
-
-      tag! 'loc', location
-      tag! 'lastmod', options[:last_modified].utc.strftime('%Y-%m-%dT%H:%M:%S+00:00') if options[:last_modified]
-
-      _close_tag 'sitemap'
+      tag! 'sitemap' do
+        tag! 'loc', location
+        tag! 'lastmod', options[:last_modified].utc.strftime('%Y-%m-%dT%H:%M:%S+00:00') if options[:last_modified]
+      end
     end
   end
 
+  class RotatingBuilder < Builder
+    MAX_URLS = 50_000
 
+    def init!(&block)
+      @urls = 0
+      super
+    end
+
+    def add_url!(location, options={})
+      if @urls >= MAX_URLS
+        close!
+        @writer.rotate
+        init!
+      end
+      super
+      @urls += 1
+    end
+  end
 end
