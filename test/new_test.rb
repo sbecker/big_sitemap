@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/test_helper'
 require 'nokogiri'
 
 class BigSitemapTest < Test::Unit::TestCase
-  
+
   ###### arguments
   should 'fail if no base_url given' do
     assert_raise(ArgumentError) do
@@ -34,7 +34,7 @@ class BigSitemapTest < Test::Unit::TestCase
       FileUtils.rm BigSitemap::LOCK_FILE
     end
   end
-  
+
   #### generate
   should 'add url' do
     BigSitemap.generate(:base_url => 'test.de') do

@@ -62,5 +62,4 @@ class BuilderTest < Test::Unit::TestCase
     end
   end
 
-
 end

@@ -12,7 +12,7 @@ end
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |t|
   t.libs << 'lib' << 'test' << Rake.original_dir
-  t.pattern = 'test/**/writer_test.rb'
+  t.pattern = 'test/**/*_test.rb'
   t.verbose = false
 end
 

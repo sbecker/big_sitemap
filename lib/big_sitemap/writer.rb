@@ -1,16 +1,12 @@
 require 'fileutils'
 require 'zlib'
+require 'stringio'
 
 class BigSitemap
 
   # Write into String
   # Perfect for testing porpuses
-  class StringWriter < String
-    # API
-    def print(string = nil)
-      self << string.to_s
-    end
-
+  class StringWriter < StringIO
     def rotate # do noting
     end
   end
@@ -71,21 +67,25 @@ class BigSitemap
     end
   end
 
-  class LockingFileWrite < FileWriter
+  class LockingFileWriter < FileWriter
     LOCK_FILE = 'generator.lock'
 
-    def with_lock(lock_file = LOCK_FILE)
-      File.join(@options[:document_full], lock_file).tap do |lock_file|
-        File.open(lock_file, 'w', File::EXCL) #lock!
-        begin
-          yield
-        ensure
-          FileUtils.rm lock_file #unlock!
-        end
-      end
+    def rotate
+      close if @file
+      File.open(LOCK_FILE, 'w', File::EXCL) #lock!
+      @file = File.open(tmp_file_name, 'w+:ASCII-8BIT')
     rescue Errno::EACCES => e
       raise 'Lockfile exists'
     end
 
+    def print(string)
+      @file.print(string)
+    end
+
+    def close
+      FileUtils.rm lock_file #unlock!
+      super
+    end
   end
+
 end
