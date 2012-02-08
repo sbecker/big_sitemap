@@ -90,9 +90,10 @@ describe BigSitemap::IndexBuilder do
 end
 
 describe BigSitemap::RotatingBuilder do
-  before do
-    BigSitemap::RotatingBuilder.send :remove_const, "MAX_URLS"
-    BigSitemap::RotatingBuilder.const_set "MAX_URLS", 1
+  it 'raises error when max_per_sitemap > MAX_URLS' do
+    expect do
+      BigSitemap::RotatingBuilder.new(BigSitemap::StringWriter.new, :max_per_sitemap => BigSitemap::RotatingBuilder::NUM_URLS.max + 1)
+    end.to raise_error(ArgumentError)
   end
 
   it 'RotatingBuilder: generate one url' do
@@ -103,7 +104,7 @@ describe BigSitemap::RotatingBuilder do
   end
 
   it 'RotatingBuilder: generate two url' do
-    BigSitemap::RotatingBuilder.new(is = BigSitemap::StringWriter.new) do
+    BigSitemap::RotatingBuilder.new(is = BigSitemap::StringWriter.new, :max_per_sitemap => 1) do
       add_url! 'test'
       add_url! 'test2'
     end

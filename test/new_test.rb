@@ -3,17 +3,6 @@ require 'nokogiri'
 
 class BigSitemapTest < Test::Unit::TestCase
 
-  ###### arguments
-  should 'fail if no base_url given' do
-    assert_raise(ArgumentError) do
-      BigSitemap.generate
-    end
-  end
-
-  should 'initalize' do
-    assert BigSitemap.generate(:base_url => 'test.de/')
-  end
-
   #todo test: min/max values of max_per_sitemap
 
   #### lock

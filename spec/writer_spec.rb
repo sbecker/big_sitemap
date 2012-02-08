@@ -21,7 +21,7 @@ describe BigSitemap::FileWriter do
   end
 
   it 'create second file on rotation' do
-    file.rotate
+    file.init!
     file.close
     File.exists?(file_name).should be_true
     File.exists?(file_name2).should be_true
@@ -35,7 +35,7 @@ describe BigSitemap::FileWriter do
 
   it 'write into second file' do
     file.print 'test'
-    file.rotate
+    file.init!
     file.print 'test2'
     file.close
     `cat '#{file_name2}'`.should == "test2"

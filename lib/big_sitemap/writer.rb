@@ -7,7 +7,7 @@ class BigSitemap
   # Write into String
   # Perfect for testing porpuses
   class StringWriter < StringIO
-    def rotate # do noting
+    def init! # do noting
     end
   end
 
@@ -18,36 +18,36 @@ class BigSitemap
   # TODO what if file exists?, overwrite flag??
   class FileWriter
     # API
-    def rotate
-      close if @file
-      @file = File.open(tmp_file_name, 'w+:ASCII-8BIT')
+    def init!
+      close if @stream
+      @stream = File.open(tmp_file_name, 'w+:ASCII-8BIT')
     end
 
     def print(string)
-      @file.print(string)
+      @stream.print(string)
     end
 
     ###
 
     def initialize(file_name_template)
-      @file_name_template = file_name_template
-      @file_names = []
-      self.rotate
+      @stream_name_template = file_name_template
+      @stream_names = []
+      self.init!
     end
 
     def close
-      @file.close
+      @stream.close
       # Move from tmp_file into acutal file
       File.delete(file_name) if File.exists?(file_name)
       File.rename(tmp_file_name, file_name)
-      @file_names << file_name
+      @stream_names << file_name
     end
 
     private
     def file_name
-      cnt = @file_names.size == 0 ? "" : "-#{@file_names.size}"
-      ext = File.extname(@file_name_template)
-      @file_name_template.gsub(ext, cnt + ext)
+      cnt = @stream_names.size == 0 ? "" : "-#{@stream_names.size}"
+      ext = File.extname(@stream_name_template)
+      @stream_name_template.gsub(ext, cnt + ext)
     end
 
     def tmp_file_name
@@ -61,25 +61,25 @@ class BigSitemap
       super(file_name_template + ".gz")
     end
 
-    def rotate
+    def init!
       super
-      @file = ::Zlib::GzipWriter.new(@file)
+      @stream = ::Zlib::GzipWriter.new(@stream)
     end
   end
 
   class LockingFileWriter < FileWriter
     LOCK_FILE = 'generator.lock'
 
-    def rotate
-      close if @file
+    def init!
+      close if @stream
       File.open(LOCK_FILE, 'w', File::EXCL) #lock!
-      @file = File.open(tmp_file_name, 'w+:ASCII-8BIT')
+      @stream = File.open(tmp_file_name, 'w+:ASCII-8BIT')
     rescue Errno::EACCES => e
       raise 'Lockfile exists'
     end
 
     def print(string)
-      @file.print(string)
+      @stream.print(string)
     end
 
     def close

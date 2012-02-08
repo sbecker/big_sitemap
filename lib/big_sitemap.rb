@@ -28,18 +28,19 @@ class BigSitemap
     :ping => [:google]
   }
 
+  attr_reader :options
+
   class << self
     def generate(options={}, &block)
       self.new(options).tap do |sitemap|
-        FileWriter.new(@options[:document_full] + "sitemap.xml").tap do |writer|
-          RotatingBuilder.new(writer) do |builder| #TODO opts: indent, max_per_sitemap
-            @builder = builder
-            instance_eval(&block)
-          end
+        FileWriter.new(sitemap.options[:document_full] + "sitemap.xml").tap do |writer|
+          @builder = RotatingBuilder.new(writer)# do |builder| #TODO opts: indent, max_per_sitemap
+          instance_eval(&block) if block
+          @builder.close!
           writer.close
         end
 
-        sitemap.generate_index
+        #sitemap.generate_index
         # BigSitemap::ping_search_engines(url, options[:ping])
       end
     end
@@ -53,10 +54,6 @@ class BigSitemap
 
   def initialize(options={})
     @options = DEFAULTS.merge options
-
-    unless (2..Builder::MAX_URLS).member?(@options[:max_per_sitemap])
-      raise ArgumentError, "\":max_per_sitemap\" must be greater than 1 and smaller than #{Builder::MAX_URLS}"
-    end
 
     #gets prefixed to url if 'http' is missing
     unless @options[:base_url]

@@ -78,7 +78,15 @@ class BigSitemap
   end
 
   class RotatingBuilder < Builder
-    MAX_URLS = 50_000
+    NUM_URLS = 1..50_000
+
+    def initialize(writer, opt = {}, &block)
+      @max_urls = opt[:max_per_sitemap] || NUM_URLS.max
+      unless NUM_URLS.member?(@max_urls)
+        raise ArgumentError, %Q(":max_per_sitemap" must be greater than #{NUM_URLS.min} and smaller than #{NUM_URLS.max})
+      end
+      super
+    end
 
     def init!(&block)
       @urls = 0
@@ -86,9 +94,9 @@ class BigSitemap
     end
 
     def add_url!(location, options={})
-      if @urls >= MAX_URLS
+      if @urls >= @max_urls
         close!
-        @writer.rotate
+        @writer.init!
         init!
       end
       super
