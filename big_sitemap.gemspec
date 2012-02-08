@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  ["bundler", "shoulda", "mocha", "nokogiri"].each do |gem|
+  ["bundler", "rspec", "shoulda", "mocha", "nokogiri"].each do |gem|
     s.add_development_dependency *gem.split(' ')
   end
 end
