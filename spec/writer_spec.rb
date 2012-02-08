@@ -49,6 +49,7 @@ describe BigSitemap::LockingFileWriter do
   let(:writer) { BigSitemap::LockingFileWriter.new(file_name).tap { |w| w.init! } }
 
   after do
+    FileUtils.rm(file_name) rescue nil
     FileUtils.rm(lock_file) rescue nil
   end
 
