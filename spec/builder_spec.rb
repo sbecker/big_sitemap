@@ -96,14 +96,14 @@ describe BigSitemap::RotatingBuilder do
     end.to raise_error(ArgumentError)
   end
 
-  it 'RotatingBuilder: generate one url' do
+  it 'generates one url' do
     BigSitemap::RotatingBuilder.new(is = BigSitemap::StringWriter.new) do
       add_url! 'test'
     end
     is.string.should == %Q(#{HEADER}\n  <url>\n    <loc>test</loc>\n  </url>\n</urlset>)
   end
 
-  it 'RotatingBuilder: generate two url' do
+  it 'generates two url' do
     BigSitemap::RotatingBuilder.new(is = BigSitemap::StringWriter.new, :max_per_sitemap => 1) do
       add_url! 'test'
       add_url! 'test2'

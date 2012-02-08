@@ -9,6 +9,9 @@ class BigSitemap
   class StringWriter < StringIO
     def init! # do noting
     end
+
+    def close! # do noting
+    end
   end
 
   # Write into File
@@ -17,30 +20,29 @@ class BigSitemap
   #
   # TODO what if file exists?, overwrite flag??
   class FileWriter
-    # API
-    def init!
-      close if @stream
-      @stream = File.open(tmp_file_name, 'w+:ASCII-8BIT')
-    end
-
-    def print(string)
-      @stream.print(string)
-    end
-
-    ###
 
     def initialize(file_name_template)
       @stream_name_template = file_name_template
       @stream_names = []
-      self.init!
     end
 
-    def close
+    # API
+    def init!
+      close! if @stream
+      @stream = File.open(tmp_file_name, 'w+:ASCII-8BIT')
+    end
+
+    def close!
       @stream.close
+      @stream = nil
       # Move from tmp_file into acutal file
       File.delete(file_name) if File.exists?(file_name)
       File.rename(tmp_file_name, file_name)
       @stream_names << file_name
+    end
+
+    def print(string)
+      @stream.print(string)
     end
 
     private
@@ -71,20 +73,16 @@ class BigSitemap
     LOCK_FILE = 'generator.lock'
 
     def init!
-      close if @stream
+      close! if @stream
       File.open(LOCK_FILE, 'w', File::EXCL) #lock!
-      @stream = File.open(tmp_file_name, 'w+:ASCII-8BIT')
+      super
     rescue Errno::EACCES => e
       raise 'Lockfile exists'
     end
 
-    def print(string)
-      @stream.print(string)
-    end
-
-    def close
-      FileUtils.rm lock_file #unlock!
+    def close!
       super
+      FileUtils.rm LOCK_FILE #unlock!
     end
   end
 

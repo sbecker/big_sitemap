@@ -20,6 +20,7 @@ class BigSitemap
     end
 
     def init!(&block) #_init_document
+      @writer.init!
       @opened_tags = []
       @writer.print '<?xml version="1.0" encoding="UTF-8"?>'
       tag! self.class::HEADER_NAME, self.class::HEADER_ATTRIBUTES, &block
@@ -59,7 +60,7 @@ class BigSitemap
       name = @opened_tags.pop
       @writer.print "\n" + ' ' * @opt[:indent_by] * @opened_tags.size if indent
       @writer.print "</#{name}>"
-      #TODO close writer if none opened_tags left??
+      @writer.close! if @opened_tags.size == 0
     end
   end
 
@@ -85,6 +86,7 @@ class BigSitemap
       unless NUM_URLS.member?(@max_urls)
         raise ArgumentError, %Q(":max_per_sitemap" must be greater than #{NUM_URLS.min} and smaller than #{NUM_URLS.max})
       end
+
       super
     end
 
@@ -96,7 +98,6 @@ class BigSitemap
     def add_url!(location, options={})
       if @urls >= @max_urls
         close!
-        @writer.init!
         init!
       end
       super

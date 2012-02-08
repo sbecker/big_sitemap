@@ -33,16 +33,13 @@ class BigSitemap
   class << self
     def generate(options={}, &block)
       self.new(options).tap do |sitemap|
-        FileWriter.new(sitemap.options[:document_full] + "sitemap.xml").tap do |writer|
-          @builder = RotatingBuilder.new(writer)# do |builder| #TODO opts: indent, max_per_sitemap
-          instance_eval(&block) if block
-          @builder.close!
-          writer.close
-        end
-
-        #sitemap.generate_index
-        # BigSitemap::ping_search_engines(url, options[:ping])
+        @builder = RotatingBuilder.new(sitemap.options[:writer])# do |builder| #TODO opts: indent, max_per_sitemap
+        instance_eval(&block) if block
+        @builder.close!
       end
+
+      #sitemap.generate_index
+      # BigSitemap::ping_search_engines(url, options[:ping])
     end
 
     private
@@ -68,11 +65,13 @@ class BigSitemap
     end
 
     Dir.mkdir(@options[:document_full]) unless File.exists?(@options[:document_full])
+
+    @options[:writer] = FileWriter.new File.join(@options[:document_full], "sitemap.xml").to_s
   end
 
   # Create a sitemap index document
   def generate_index(files = Dir[sitemap_files])
-    File.open(@options[:document_full] + "sitemap_index.xml") do |writer|
+    FileWriter.new(@options[:document_full] + "sitemap_index.xml") do |writer|
       IndexBuilder.new('sitemap_index') do |builder|
         files.each do |path|
           next if path =~ /index/

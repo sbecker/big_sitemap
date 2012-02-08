@@ -5,25 +5,6 @@ class BigSitemapTest < Test::Unit::TestCase
 
   #todo test: min/max values of max_per_sitemap
 
-  #### lock
-  should 'create lockfile' do
-    BigSitemap.generate(:base_url => 'test.de/') do
-      assert File.exists?(BigSitemap::LOCK_FILE)
-    end
-    assert !File.exists?(BigSitemap::LOCK_FILE)
-  end
-
-  should 'fail if lockfile exists' do
-    begin
-      File.open(BigSitemap::LOCK_FILE, 'w', File::EXCL)
-      assert_raise(RuntimeError) do
-        BigSitemap.generate(:base_url => 'test.de/')
-      end
-    ensure
-      FileUtils.rm BigSitemap::LOCK_FILE
-    end
-  end
-
   #### generate
   should 'add url' do
     BigSitemap.generate(:base_url => 'test.de') do
