@@ -1,4 +1,4 @@
-class BigSitemap
+module MassiveSitemap
   class Ping
     PING = {
      :google => 'http://www.google.comwebmasters/tools/ping?sitemap=%s';

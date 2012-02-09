@@ -1,33 +1,24 @@
 PATH
   remote: .
   specs:
-    big_sitemap (1.0.0)
+    massive_sitemap (0.0.1)
 
 GEM
   remote: http://rubygems.org/
   specs:
     diff-lcs (1.1.3)
-    mocha (0.9.10)
-      rake
-    nokogiri (1.4.4)
-    rake (0.8.7)
-    rspec (2.7.0)
-      rspec-core (~> 2.7.0)
-      rspec-expectations (~> 2.7.0)
-      rspec-mocks (~> 2.7.0)
-    rspec-core (2.7.1)
-    rspec-expectations (2.7.0)
+    rspec (2.8.0)
+      rspec-core (~> 2.8.0)
+      rspec-expectations (~> 2.8.0)
+      rspec-mocks (~> 2.8.0)
+    rspec-core (2.8.0)
+    rspec-expectations (2.8.0)
       diff-lcs (~> 1.1.2)
-    rspec-mocks (2.7.0)
-    shoulda (2.11.3)
+    rspec-mocks (2.8.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  big_sitemap!
-  bundler
-  mocha
-  nokogiri
+  massive_sitemap!
   rspec
-  shoulda

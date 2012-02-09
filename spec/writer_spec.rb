@@ -1,9 +1,11 @@
 require "spec_helper"
 
-describe BigSitemap::FileWriter do
+require "massive_sitemap/writer/file"
+
+describe MassiveSitemap::Writer::File do
   let(:file_name) { 'test.txt' }
   let(:file_name2) { 'test-1.txt' }
-  let(:writer) { BigSitemap::FileWriter.new(file_name).tap { |w| w.init! } }
+  let(:writer) {  MassiveSitemap::Writer::File.new(file_name).tap { |w| w.init! } }
 
   after do
     FileUtils.rm(file_name) rescue nil
@@ -12,7 +14,7 @@ describe BigSitemap::FileWriter do
 
   it 'wrong template' do
     file_name = 'test'
-    BigSitemap::FileWriter.new(file_name)
+     MassiveSitemap::Writer::File.new(file_name)
   end
 
   it 'create file' do
@@ -43,10 +45,11 @@ describe BigSitemap::FileWriter do
   end
 end
 
-describe BigSitemap::LockingFileWriter do
+require "massive_sitemap/writer/locking_file"
+describe MassiveSitemap::Writer::LockingFile do
   let(:file_name) { 'test.txt' }
-  let(:lock_file) { BigSitemap::LockingFileWriter::LOCK_FILE }
-  let(:writer) { BigSitemap::LockingFileWriter.new(file_name).tap { |w| w.init! } }
+  let(:lock_file) {  MassiveSitemap::Writer::LockingFile::LOCK_FILE }
+  let(:writer) { MassiveSitemap::Writer::LockingFile.new(file_name).tap { |w| w.init! } }
 
   after do
     FileUtils.rm(file_name) rescue nil
