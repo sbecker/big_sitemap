@@ -1,18 +1,18 @@
 require "spec_helper"
 
-require "massive_sitemap/builder/base"
+require "massive_sitemap/builder"
 require "massive_sitemap/writer/string"
 
 describe MassiveSitemap::Builder::Base do
   HEADER = %Q(<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">)
 
   let(:writer) { MassiveSitemap::Writer::String.new }
-  let(:builder) { MassiveSitemap::Builder::Base.new(writer) }
+  let(:builder) { MassiveSitemap::Builder.new(writer) }
 
   describe "#arguments" do
     it 'fail if no writer given' do
       expect do
-        MassiveSitemap::Builder::Base.new
+        MassiveSitemap::Builder.new
       end.to raise_error(ArgumentError)
     end
   end
@@ -37,20 +37,20 @@ describe MassiveSitemap::Builder::Base do
 
   context "as block" do
     it 'generate basic skeleton' do
-      MassiveSitemap::Builder::Base.new(writer) do
+      MassiveSitemap::Builder.new(writer) do
       end
       writer.string.should == %Q(#{HEADER}\n</urlset>)
     end
 
     it 'generate one url' do
-      MassiveSitemap::Builder::Base.new(writer) do
+      MassiveSitemap::Builder.new(writer) do
         add_url! 'test'
       end
       writer.string.should == %Q(#{HEADER}\n  <url>\n    <loc>test</loc>\n  </url>\n</urlset>)
     end
 
     it 'generate one url, no indent' do
-      MassiveSitemap::Builder::Base.new(writer, :indent_by => 0) do
+      MassiveSitemap::Builder.new(writer, :indent_by => 0) do
         add_url! 'test'
       end
       writer.string.should == %Q(#{HEADER}\n<url>\n<loc>test</loc>\n</url>\n</urlset>)
@@ -59,7 +59,7 @@ describe MassiveSitemap::Builder::Base do
     it 'generate two url' do
       writer.should_receive(:init!).once
       writer.should_receive(:close!).once
-      MassiveSitemap::Builder::Base.new(writer) do
+      MassiveSitemap::Builder.new(writer) do
         add_url! 'test'
         add_url! 'test2'
       end
@@ -67,7 +67,7 @@ describe MassiveSitemap::Builder::Base do
     end
 
     it 'generate one url with attrs' do
-      MassiveSitemap::Builder::Base.new(writer) do
+      MassiveSitemap::Builder.new(writer) do
         add_url! 'test', :change_frequency => 'weekly', :priority => 0.8
       end
       expect = <<-XML
