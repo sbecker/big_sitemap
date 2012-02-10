@@ -19,12 +19,12 @@ module MassiveSitemap
       def initialize(writer, options = {}, &block)
         @writer  = writer
         @options = OPTS.merge(options)
-        @builder = self
+
         init!(&block)
       end
 
       def add(path, attrs = {})
-        add_url! File.join(options[:base_url], path), attrs
+        add_url! File.join(base_url, path), attrs
       end
 
       def init!(&block) #_init_document
@@ -69,6 +69,12 @@ module MassiveSitemap
         @writer.print "\n" + ' ' * options[:indent_by] * @opened_tags.size if indent
         @writer.print "</#{name}>"
         @writer.close! if @opened_tags.size == 0
+      end
+
+      private
+      def base_url
+        schema, host = @options[:base_url].scan(/^(https?:\/\/)?(.+?)\/?$/).flatten
+        "#{schema || 'http://'}#{host}/"
       end
     end
   end

@@ -9,8 +9,12 @@ require 'fileutils'
 module MassiveSitemap
   module Writer
     class File
+
+      class FileExistsException < Exception; end
+
       OPTS = {
         :document_full => '.',
+        :force_overwrite => false,
       }
 
       attr_reader :options
@@ -19,6 +23,7 @@ module MassiveSitemap
         @stream_name_template = file_name_template
         @options              = OPTS.merge(options)
         @stream_names         = []
+        @stream               = nil
       end
 
       def document_full
@@ -28,8 +33,11 @@ module MassiveSitemap
       # API
       def init!
         close! if @stream
-        #if File.exists?(file_name)
-        @stream = ::File.open(tmp_file_name, 'w+:ASCII-8BIT')
+        if @options[:force_overwrite] || !::File.exists?(file_name)
+          @stream = ::File.open(tmp_file_name, 'w:ASCII-8BIT')
+        else
+          raise FileExistsException, "Can not create file: #{file_name} exits"
+        end
       end
 
       def close!

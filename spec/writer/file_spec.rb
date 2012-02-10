@@ -43,4 +43,28 @@ describe MassiveSitemap::Writer::File do
     writer.close!
     `cat '#{file_name2}'`.should == "test2"
   end
+
+  context "opening write file" do
+    before do
+      File.open(file_name, 'w') {}
+    end
+
+    after do
+      FileUtils.rm(file_name) rescue nil
+    end
+
+    it 'raises when file exits' do
+      writer = MassiveSitemap::Writer::File.new(file_name)
+      expect do
+        writer.init!
+      end.to raise_error(MassiveSitemap::Writer::File::FileExistsException)
+    end
+
+    it 'raises when file exits' do
+      writer = MassiveSitemap::Writer::File.new(file_name, :force_overwrite => true)
+      expect do
+        writer.init!
+      end.to_not raise_error(MassiveSitemap::Writer::File::FileExistsException)
+    end
+  end
 end

@@ -19,28 +19,31 @@ require 'massive_sitemap/builder/rotating'
 
 module MassiveSitemap
   DEFAULTS = {
-    # writer
-    :document_full   => '.',
-
     # builder
     :base_url        => nil,
     :indent_by       => 2,
+
+    # writer
+    :document_full   => '.',
+    :force_overwrite  => false,
+
+    # writer gzip
+    :gzip            => false,
   }
 
   def generate(options = {}, &block)
-    options = DEFAULTS.merge options
+    @options = DEFAULTS.merge options
 
     unless options[:base_url]
       raise ArgumentError, 'you must specify ":base_url" string'
     end
-    options[:base_url] = beauty_url(options[:base_url])
 
-    Dir.mkdir(options[:document_full]) unless ::File.exists?(options[:document_full])
+    Dir.mkdir(options[:document_full]) unless ::File.exists?(@options[:document_full])
 
-    writer_class = options.delete(:gzip) ? Writer::GzipFile : Writer::File
+    writer_class = @options.delete(:gzip) ? Writer::GzipFile : Writer::File
 
-    @writer = writer_class.new "sitemap.xml", options
-    @builder = Builder::Rotating.new(@writer, options)
+    @writer = writer_class.new "sitemap.xml", @options
+    @builder = Builder::Rotating.new(@writer, @options)
     instance_eval(&block) if block
     @builder.close!
   end
@@ -50,11 +53,4 @@ module MassiveSitemap
     @builder.add(path, attrs)
   end
   module_function :add
-
-  # move to builder???
-  def beauty_url(url)
-    schema, host = url.scan(/^(https?:\/\/)?(.+?)\/?$/).flatten
-    "#{schema || 'http://'}#{host}/"
-  end
-  module_function :beauty_url
 end

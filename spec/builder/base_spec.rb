@@ -82,4 +82,22 @@ XML
       writer.string.should == expect.strip
     end
   end
+
+  describe ".base_url" do
+    URLS = %w(
+      http://test.de/
+      test.de/
+      test.de
+    )
+
+    URLS.each do |url|
+      it "transforms to valid url" do
+        MassiveSitemap::Builder.new(writer, :base_url => url).send(:base_url).should == "http://test.de/"
+      end
+    end
+
+    it "transforms to valid url with https" do
+      MassiveSitemap::Builder.new(writer, :base_url => "https://test.de/").send(:base_url).should == "https://test.de/"
+    end
+  end
 end
