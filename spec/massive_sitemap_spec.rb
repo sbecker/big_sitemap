@@ -31,6 +31,19 @@ describe MassiveSitemap do
       MassiveSitemap.generate(:base_url => 'test.de/')
       ::File.exists?(file_name).should be_true
     end
+
+    context "gziped" do
+      let(:gz_file_name) { "#{file_name}.gz" }
+
+      after do
+        FileUtils.rm(gz_file_name) rescue nil
+      end
+
+      it 'creates sitemap file' do
+        MassiveSitemap.generate(:base_url => 'test.de/', :gzip => true)
+        ::File.exists?(gz_file_name).should be_true
+      end
+    end
   end
 
   describe "#generate" do

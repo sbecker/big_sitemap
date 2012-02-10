@@ -4,6 +4,7 @@
 require "massive_sitemap/version"
 
 require 'massive_sitemap/writer/file'
+require 'massive_sitemap/writer/gzip_file'
 require 'massive_sitemap/builder/rotating'
 
 # Page at -> <base_url>
@@ -40,9 +41,9 @@ module MassiveSitemap
 
     Dir.mkdir(options[:document_full]) unless ::File.exists?(@options[:document_full])
 
-    writer_class = @options.delete(:gzip) ? Writer::GzipFile : Writer::File
+    @writer_class = @options[:gzip] ? Writer::GzipFile : Writer::File
 
-    @writer = writer_class.new "sitemap.xml", @options
+    @writer = @writer_class.new "sitemap.xml", @options
     @builder = Builder::Rotating.new(@writer, @options)
     instance_eval(&block) if block
     @builder.close!
