@@ -7,7 +7,7 @@ describe MassiveSitemap do
   describe "#initalize" do
     it 'fail if no base_url given' do
       expect do
-        MassiveSitemap::generate
+        MassiveSitemap.generate
       end.to raise_error(ArgumentError)
     end
 

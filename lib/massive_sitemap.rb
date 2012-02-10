@@ -28,19 +28,28 @@ module MassiveSitemap
   }
 
   def generate(options = {}, &block)
-    @options = DEFAULTS.merge options
+    options = DEFAULTS.merge options
 
-    unless @options[:base_url]
+    unless options[:base_url]
       raise ArgumentError, 'you must specify ":base_url" string'
     end
-    @options[:base_url] = beauty_url(@options[:base_url])
+    options[:base_url] = beauty_url(options[:base_url])
 
-    Dir.mkdir(@options[:document_full]) unless ::File.exists?(@options[:document_full])
+    Dir.mkdir(options[:document_full]) unless ::File.exists?(options[:document_full])
 
-    writer = Writer::File.new "sitemap.xml", @options
-    Builder::Rotating.new(writer, @options, &block)
+    writer_class = options.delete(:gzip) ? Writer::GzipFile : Writer::File
+
+    @writer = writer_class.new "sitemap.xml", options
+    @builder = Builder::Rotating.new(@writer, options)
+    instance_eval(&block) if block
+    @builder.close!
   end
   module_function :generate
+
+  def add(path, attrs = {})
+    @builder.add(path, attrs)
+  end
+  module_function :add
 
   # move to builder???
   def beauty_url(url)
