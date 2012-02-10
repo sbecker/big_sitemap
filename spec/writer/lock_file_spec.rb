@@ -1,14 +1,14 @@
 require "massive_sitemap/writer/locking_file"
 
 describe MassiveSitemap::Writer::LockingFile do
-  let(:file_name) { 'test.txt' }
-  let(:tmp_file_name) { "#{file_name}.tmp" }
+  let(:filename) { 'sitemap.xml' }
+  let(:tmp_filename) { "#{filename}.tmp" }
   let(:lock_file) {  MassiveSitemap::Writer::LockingFile::LOCK_FILE }
-  let(:writer) { MassiveSitemap::Writer::LockingFile.new(file_name).tap { |w| w.init! } }
+  let(:writer) { MassiveSitemap::Writer::LockingFile.new.tap { |w| w.init! } }
 
   after do
-    FileUtils.rm(file_name) rescue nil
-    FileUtils.rm(tmp_file_name) rescue nil
+    FileUtils.rm(filename) rescue nil
+    FileUtils.rm(tmp_filename) rescue nil
     FileUtils.rm(lock_file) rescue nil
   end
 

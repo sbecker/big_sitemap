@@ -9,8 +9,13 @@ module MassiveSitemap
     class String < StringIO
       attr_reader :options
 
+      def initialize(options = {})
+        @options = options
+        super()
+      end
+
       # API
-      def init! # do noting
+      def init!(options = {}) # do noting
       end
 
       def close! # do noting

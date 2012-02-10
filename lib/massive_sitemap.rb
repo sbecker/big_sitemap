@@ -4,7 +4,6 @@
 require "massive_sitemap/version"
 
 require 'massive_sitemap/writer/file'
-require 'massive_sitemap/writer/gzip_file'
 require 'massive_sitemap/builder/rotating'
 require 'massive_sitemap/builder/index'
 
@@ -26,29 +25,30 @@ module MassiveSitemap
     # writer
     :document_full          => '.',
     :force_overwrite        => false,
-    :sitemap_filename       => "sitemap.xml",
+    :filename               => "sitemap.xml",
     :index_filename         => "sitemap_index.xml",
-    # writer gzip
-    :gzip                   => false,
+
+    # writer
+    :writer                 => MassiveSitemap::Writer::File,
   }
 
   def generate(options = {}, &block)
     @options = DEFAULTS.merge options
 
-    unless options[:base_url]
+    unless @options[:base_url]
       raise ArgumentError, 'you must specify ":base_url" string'
     end
+    @options[:index_base_url] ||= @options[:base_url]
 
     Dir.mkdir(options[:document_full]) unless ::File.exists?(@options[:document_full])
 
-    @writer_class = @options[:gzip] ? Writer::GzipFile : Writer::File
+    @writer = @options[:writer].new @options
 
     generate_sitemap(&block)
   end
   module_function :generate
 
   def generate_sitemap(&block)
-    @writer = @writer_class.new @options[:sitemap_filename], @options
     @builder = Builder::Rotating.new(@writer, @options)
     instance_eval(&block) if block
     @builder.close!
@@ -61,8 +61,8 @@ module MassiveSitemap
     ext     = @options[:gzip] ? "xml.gz" : "xml"
     files ||= Dir[File.join(@options[:document_full], "*.#{ext}")]
 
-    @writer = @writer_class.new @options[:index_filename], @options.merge(:force_overwrite => true)
-    Builder::Index.new(@writer, @options.merge(:base_url => "http://test.de")) do
+    @writer.options.merge!(:filename => @options[:index_filename], :force_overwrite => true)
+    Builder::Index.new(@writer, @options) do
       files.each do |path|
         next if path.include?(@options[:index_filename])
         add ::File.basename(path), :last_modified => File.stat(path).mtime

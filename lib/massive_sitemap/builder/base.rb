@@ -29,6 +29,10 @@ module MassiveSitemap
 
       def init!(&block) #_init_document
         @writer.init!
+        header!(&block)
+      end
+
+      def header!(&block)
         @opened_tags = []
         @writer.print '<?xml version="1.0" encoding="UTF-8"?>'
         tag! self.class::HEADER_NAME, self.class::HEADER_ATTRIBUTES, &block
@@ -65,10 +69,11 @@ module MassiveSitemap
       end
 
       def close!(indent = true) #_close_tag / #_close_document
-        name = @opened_tags.pop
-        @writer.print "\n" + ' ' * options[:indent_by] * @opened_tags.size if indent
-        @writer.print "</#{name}>"
-        @writer.close! if @opened_tags.size == 0
+        if name = @opened_tags.pop
+          @writer.print "\n" + ' ' * options[:indent_by] * @opened_tags.size if indent
+          @writer.print "</#{name}>"
+          @writer.close! if @opened_tags.size == 0
+        end
       end
 
       private

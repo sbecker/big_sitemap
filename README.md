@@ -8,5 +8,3 @@ MassiveSitemap is a successor project of [BigSitemap](https://github.com/alexrab
 It implements various generation stategies, e.g. to split large Sitemaps into multiple files, gzip files to minimize bandwidth usage, or incremental updates. Its Api is very similar to _BigSitemap_ and therefor can be set up with just a few lines of code and is compatible with just about any framework.
 
 ## Usage
-
-

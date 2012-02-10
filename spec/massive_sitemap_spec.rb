@@ -1,17 +1,17 @@
 require "spec_helper"
 
-require "massive_sitemap/writer/file"
+require "massive_sitemap/writer/gzip_file"
 
 describe MassiveSitemap do
-  let(:file_name) { 'sitemap.xml' }
-  let(:file_name2) { 'sitemap2.xml' }
+  let(:filename) { 'sitemap.xml' }
+  let(:filename2) { 'sitemap2.xml' }
 
-  let(:output) { `cat '#{file_name}'` }
-  let(:output2) { `cat '#{file_name2}'` }
+  let(:output) { `cat '#{filename}'` }
+  let(:output2) { `cat '#{filename2}'` }
 
   after do
-    FileUtils.rm(file_name) rescue nil
-    FileUtils.rm(file_name2) rescue nil
+    FileUtils.rm(filename) rescue nil
+    FileUtils.rm(filename2) rescue nil
   end
 
   describe "#initalize" do
@@ -21,27 +21,21 @@ describe MassiveSitemap do
       end.to raise_error(ArgumentError)
     end
 
-    it 'initalize' do
-      expect do
-        MassiveSitemap.generate(:base_url => 'test.de/')
-      end.to_not raise_error
-    end
-
     it 'creates sitemap file' do
       MassiveSitemap.generate(:base_url => 'test.de/')
-      ::File.exists?(file_name).should be_true
+      ::File.exists?(filename).should be_true
     end
 
     context "gziped" do
-      let(:gz_file_name) { "#{file_name}.gz" }
+      let(:gz_filename) { "#{filename}.gz" }
 
       after do
-        FileUtils.rm(gz_file_name) rescue nil
+        FileUtils.rm(gz_filename) rescue nil
       end
 
       it 'creates sitemap file' do
-        MassiveSitemap.generate(:base_url => 'test.de/', :gzip => true)
-        ::File.exists?(gz_file_name).should be_true
+        MassiveSitemap.generate(:base_url => 'test.de/', :writer => MassiveSitemap::Writer::GzipFile)
+        ::File.exists?(gz_filename).should be_true
       end
     end
   end
@@ -63,8 +57,8 @@ describe MassiveSitemap do
 
     it 'adds url' do
       MassiveSitemap.generate(:base_url => 'test.de/') do
-        writer = MassiveSitemap::Writer::File.new "sitemap2.xml", @writer.options
-        MassiveSitemap::Builder::Rotating.new(writer, @builder.options) do
+        writer = @writer.class.new(@options.merge(:filename => "sitemap2.xml"))
+        MassiveSitemap::Builder::Rotating.new(writer, @options) do
           add "/set/name"
         end
       end

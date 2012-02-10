@@ -9,7 +9,7 @@ module MassiveSitemap
     class LockingFile < File
         LOCK_FILE = 'generator.lock'
 
-        def init!
+        def init!(options = {})
           close! if @stream
           if ::File.exists?(LOCK_FILE)
             raise Errno::EACCES

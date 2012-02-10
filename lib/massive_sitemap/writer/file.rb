@@ -13,55 +13,51 @@ module MassiveSitemap
       class FileExistsException < Exception; end
 
       OPTS = {
-        :document_full => '.',
+        :document_full   => '.',
         :force_overwrite => false,
+        :filename        => "sitemap.xml",
+        :index_filename  => "sitemap_index.xml",
       }
 
       attr_reader :options
 
-      def initialize(file_name_template, options = {})
-        @stream_name_template = file_name_template
-        @options              = OPTS.merge(options)
-        @stream_names         = []
-        @stream               = nil
-      end
-
-      def document_full
-        ::File.dirname (@stream_name_template)
+      def initialize(options = {})
+        @options = OPTS.merge(options)
+        @stream  = nil
       end
 
       # API
-      def init!
+      def init!(options = {})
         close! if @stream
-        if @options[:force_overwrite] || !::File.exists?(file_name)
-          @stream = ::File.open(tmp_file_name, 'w:ASCII-8BIT')
+        @options = @options.merge(options)
+        if @options[:force_overwrite] || !::File.exists?(filename)
+          @stream = ::File.open(tmp_filename, 'w:ASCII-8BIT')
         else
-          raise FileExistsException, "Can not create file: #{file_name} exits"
+          raise FileExistsException, "Can not create file: #{filename} exits"
         end
       end
 
       def close!
-        @stream.close
-        @stream = nil
-        # Move from tmp_file into acutal file
-        ::File.delete(file_name) if ::File.exists?(file_name)
-        ::File.rename(tmp_file_name, file_name)
-        @stream_names << file_name
+        if @stream
+          @stream.close
+          @stream = nil
+          # Move from tmp_file into acutal file
+          ::File.delete(filename) if ::File.exists?(filename)
+          ::File.rename(tmp_filename, filename)
+        end
       end
 
       def print(string)
         @stream.print(string)
       end
 
-      private
-      def file_name
-        cnt = @stream_names.size == 0 ? "" : "-#{@stream_names.size}"
-        ext = ::File.extname(@stream_name_template)
-        ::File.join options[:document_full], @stream_name_template.gsub(ext, cnt + ext)
+      #private
+      def filename
+        @options[:filename]
       end
 
-      def tmp_file_name
-        file_name + ".tmp"
+      def tmp_filename
+        filename + ".tmp"
       end
     end
 

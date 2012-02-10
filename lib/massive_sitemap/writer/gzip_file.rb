@@ -7,12 +7,12 @@ module MassiveSitemap
   module Writer
 
     class GzipFile < File
-      def initialize(file_name_template, options = {})
-        super(file_name_template + ".gz", options)
+      def filename
+        @options[:filename] + ".gz"
       end
 
       # API
-      def init!
+      def init!(options = {})
         super
         @stream = ::Zlib::GzipWriter.new(@stream)
       end
