@@ -72,4 +72,32 @@ describe MassiveSitemap do
     end
 
   end
+
+  describe "#generate_index" do
+    let(:index_file) { 'sitemap_index.xml' }
+    let(:index_output) { `cat '#{index_file}'` }
+    let(:lastmod) { File.stat(index_file).mtime.utc.strftime('%Y-%m-%dT%H:%M:%S+00:00') }
+
+    after do
+      FileUtils.rm(index_file) rescue nil
+    end
+
+    it 'includes urls' do
+      MassiveSitemap.generate(:base_url => 'test.de/') do
+        add "/set/name"
+      end.generate_index
+
+      index_output.should == <<-XML
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>http://test.de/sitemap.xml</loc>
+    <lastmod>#{lastmod}</lastmod>
+  </sitemap>
+</sitemapindex>
+XML
+.strip
+
+    end
+  end
 end

@@ -7,10 +7,9 @@
 
 ## v2.0.x - ???
 
-  * added Index generation
   * updated/fixed Ping
   * updated Docu
-  * Writer overwrite detection
+  * don't init new writer all the time
 
 ## v2.0.1 - 9-02-2012
   _inital release_
@@ -22,4 +21,5 @@
   * added several implementations/specifiaction of builder/writer
   * added generator for default setup
   * added specs
-
+  * writer overwrite detection
+  * added Index generation
