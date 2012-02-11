@@ -20,6 +20,7 @@ module MassiveSitemap
   DEFAULTS = {
     # builder
     :base_url               => nil,
+    :index_base_url         => nil,
     :indent_by              => 2,
 
     # writer
@@ -61,7 +62,7 @@ module MassiveSitemap
     files ||= Dir[File.join(@options[:document_full], "*.{xml,xml.gz}")]
 
     @writer.options.merge!(:filename => @options[:index_filename], :force_overwrite => true)
-    Builder::Index.new(@writer, @options) do
+    Builder::Index.new(@writer, @options.merge(:base_url => @options[:index_base_url])) do
       files.each do |path|
         next if path.include?(@options[:index_filename])
         add ::File.basename(path), :last_modified => File.stat(path).mtime

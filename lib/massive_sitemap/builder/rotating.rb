@@ -21,7 +21,10 @@ module MassiveSitemap
       # with same file name but -<counter> appendend
       def init!(&block) #_init_document
         @urls = 0
-        @writer.init! :filename => filename_with_rotation(@writer.options[:filename], @rotations)
+        begin
+          @writer.init! :filename => filename_with_rotation(@writer.options[:filename], @rotations)
+        rescue Writer::File::FileExistsException => e
+        end
         header!(&block)
       end
 

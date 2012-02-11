@@ -28,7 +28,10 @@ module MassiveSitemap
       end
 
       def init!(&block)
-        @writer.init!
+        begin
+          @writer.init!
+        rescue Writer::File::FileExistsException => e
+        end
         header!(&block)
       end
 

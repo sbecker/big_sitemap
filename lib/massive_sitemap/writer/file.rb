@@ -6,7 +6,7 @@ module MassiveSitemap
   module Writer
     class File
 
-      class FileExistsException < Exception; end
+      class FileExistsException < IOError; end
 
       OPTS = {
         :document_full   => '.',
@@ -44,7 +44,7 @@ module MassiveSitemap
       end
 
       def print(string)
-        @stream.print(string)
+        @stream.print(string) if @stream
       end
 
       private
