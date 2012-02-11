@@ -9,7 +9,7 @@
 
   * updated/fixed Ping
   * updated Docu
-  * don't init new writer all the time
+  * switch to writer chain
 
 ## v2.0.1 - 9-02-2012
   _inital release_
@@ -23,3 +23,4 @@
   * added specs
   * writer overwrite detection
   * added Index generation
+  * don't init new writer all the time

@@ -4,6 +4,7 @@
 require "massive_sitemap/version"
 
 require 'massive_sitemap/writer/file'
+require 'massive_sitemap/writer/gzip_file'
 require 'massive_sitemap/builder/rotating'
 require 'massive_sitemap/builder/index'
 
@@ -19,18 +20,19 @@ require 'massive_sitemap/builder/index'
 module MassiveSitemap
   DEFAULTS = {
     # builder
-    :base_url               => nil,
-    :index_base_url         => nil,
-    :indent_by              => 2,
+    :base_url        => nil,
+    :index_base_url  => nil,
+    :indent_by       => 2,
 
     # writer
-    :document_full          => '.',
-    :force_overwrite        => false,
-    :filename               => "sitemap.xml",
-    :index_filename         => "sitemap_index.xml",
+    :document_full   => '.',
+    :force_overwrite => false,
+    :filename        => "sitemap.xml",
+    :index_filename  => "sitemap_index.xml",
 
-    # writer
-    :writer                 => MassiveSitemap::Writer::File,
+    # global
+    :gzip            => false,
+    :writer          => MassiveSitemap::Writer::File,
   }
 
   def generate(options = {}, &block)
@@ -43,6 +45,8 @@ module MassiveSitemap
 
     Dir.mkdir(@options[:document_full]) unless ::File.exists?(@options[:document_full])
 
+    @options[:writer] = MassiveSitemap::Writer::GzipFile if @options[:gzip]
+
     @writer = @options[:writer].new @options
 
     generate_sitemap(&block)
@@ -50,7 +54,11 @@ module MassiveSitemap
   module_function :generate
 
   def generate_sitemap(&block)
-    @builder = Builder::Rotating.new(@writer, @options)
+    begin
+      @builder = Builder::Rotating.new(@writer, @options)
+    rescue Writer::File::FileExistsException => e
+      # puts "Base: #{e.message}"
+    end
     instance_eval(&block) if block
     @builder.close!
     self

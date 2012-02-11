@@ -31,12 +31,17 @@ describe MassiveSitemap do
       ::File.exists?(filename).should be_true
     end
 
-    context "gziped" do
+    context "custom writer" do
       after do
         FileUtils.rm(gz_filename) rescue nil
       end
 
-      it 'creates sitemap file' do
+      it 'takes gzips writer' do
+        MassiveSitemap.generate(:base_url => 'test.de/', :gzip => true)
+        ::File.exists?(gz_filename).should be_true
+      end
+
+      it 'takes custom writer' do
         MassiveSitemap.generate(:base_url => 'test.de/', :writer => MassiveSitemap::Writer::GzipFile)
         ::File.exists?(gz_filename).should be_true
       end
