@@ -26,10 +26,14 @@ module MassiveSitemap
         header!(&block)
       end
 
+      def close!(indent = true)
+        super
+        @rotations += 1
+      end
+
       def add_url!(location, attrs = {})
         if @urls >= @max_urls
           close!
-          @rotations += 1
           init!
         end
         super

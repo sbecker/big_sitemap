@@ -10,11 +10,11 @@ module MassiveSitemap
         LOCK_FILE = 'generator.lock'
 
         def init!(options = {})
-          close! if @stream
+          close!
           if ::File.exists?(LOCK_FILE)
             raise Errno::EACCES
           else
-            @lock_file = ::File.open(LOCK_FILE, 'w', ::File::EXCL) #lock!
+            ::File.open(LOCK_FILE, 'w', ::File::EXCL) #lock!
             super
           end
         rescue Errno::EACCES => e
@@ -22,8 +22,9 @@ module MassiveSitemap
         end
 
         def close!
-          super
-          FileUtils.rm(LOCK_FILE) if @lock_file #unlock!
+          if super
+            FileUtils.rm(LOCK_FILE) #unlock!
+          end
         end
       end
 

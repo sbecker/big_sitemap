@@ -24,8 +24,8 @@ module MassiveSitemap
 
       # API
       def init!(options = {})
-        close! if @stream
-        @options = @options.merge(options)
+        close!
+        @options.merge!(options)
         if @options[:force_overwrite] || !::File.exists?(filename)
           @stream = ::File.open(tmp_filename, 'w:ASCII-8BIT')
         else

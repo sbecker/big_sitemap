@@ -15,14 +15,14 @@ describe MassiveSitemap::Writer::LockingFile do
   it 'creates lockfile' do
     expect do
       writer
-    end.to change { File.exists?(lock_file) }.from(false).to(true)
+    end.to change { File.exists?(lock_file) }.to(true)
   end
 
   it 'deletes lockfile' do
     writer
     expect do
       writer.close!
-    end.to change { File.exists?(lock_file) }.from(true).to(false)
+    end.to change { File.exists?(lock_file) }.to(false)
   end
 
   it 'fails if lockfile exists' do
