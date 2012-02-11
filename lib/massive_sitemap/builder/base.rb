@@ -17,37 +17,49 @@ module MassiveSitemap
       attr_reader :options
 
       def initialize(writer, options = {}, &block)
-        @writer  = writer
-        @options = OPTS.merge(options)
+        @writer      = writer
+        @options     = OPTS.merge(options)
+        @opened_tags = []
 
-        init!(&block)
+        if block
+          instance_eval(&block)
+          close!
+        end
       end
 
       def add(path, attrs = {})
         add_url! File.join(base_url, path), attrs
       end
 
-      def init!(&block)
-        @writer.init!
-        header!(&block)
+      def init!
+        unless @inited
+          @writer.init!
+          header!
+          @inited = true
+        end
       end
 
       def close!(indent = true)
         if name = @opened_tags.pop
           @writer.print "\n" + ' ' * options[:indent_by] * @opened_tags.size if indent
           @writer.print "</#{name}>"
-          @writer.close! if @opened_tags.size == 0
+          if @opened_tags.size == 0
+            @writer.close!
+            @inited = false
+            true
+          end
         end
       end
 
       private
-      def header!(&block)
-        @opened_tags = []
+      def header!
         @writer.print '<?xml version="1.0" encoding="UTF-8"?>'
-        tag! self.class::HEADER_NAME, self.class::HEADER_ATTRIBUTES, &block
+        tag! self.class::HEADER_NAME, self.class::HEADER_ATTRIBUTES
       end
 
       def add_url!(location, attrs = {})
+        init!
+
         tag! 'url' do
           tag! 'loc', location
           tag! 'lastmod', attrs[:last_modified].utc.strftime('%Y-%m-%dT%H:%M:%S+00:00') if attrs[:last_modified]

@@ -31,6 +31,43 @@ describe MassiveSitemap::Builder::Rotating do
     writer.string.should == %Q(#{header}\n  <url>\n    <loc>test</loc>\n  </url>\n</urlset>#{header}\n  <url>\n    <loc>test2</loc>\n  </url>\n</urlset>)
   end
 
+  context "with file" do
+    let(:filename) { 'sitemap.xml' }
+    let(:filename2) { 'sitemap-1.xml' }
+    let(:writer) { MassiveSitemap::Writer::File.new }
+
+    after do
+      FileUtils.rm(filename) rescue nil
+      FileUtils.rm(filename2) rescue nil
+    end
+
+    it 'generates two url' do
+      expect do
+        expect do
+          MassiveSitemap::Builder::Rotating.new(writer, :max_per_sitemap => 1) do
+            add 'test'
+            add 'test2'
+          end
+        end.to change { File.exists?(filename) }.to(true)
+      end.to change { File.exists?(filename2) }.to(true)
+    end
+
+    it 'generates two url when file exists' do
+      File.open(filename, 'w') {}
+      expect do
+        expect do
+          MassiveSitemap::Builder::Rotating.new(writer, :max_per_sitemap => 1) do
+            begin
+              add 'test'
+            rescue MassiveSitemap::Writer::File::FileExistsException
+            end
+            add 'test2'
+          end
+        end.to_not change { File.exists?(filename) }.to(true)
+      end.to change { File.exists?(filename2) }.to(true)
+    end
+  end
+
   describe "#filename_with_rotation" do
     context "keeps filename" do
       it "rotation is zero" do

@@ -26,9 +26,10 @@ describe MassiveSitemap do
       end.to raise_error(ArgumentError)
     end
 
-    it 'creates sitemap file' do
-      MassiveSitemap.generate(:base_url => 'test.de/')
-      ::File.exists?(filename).should be_true
+    it "does not create empty sitemap file" do
+      expect do
+        MassiveSitemap.generate(:base_url => 'test.de/')
+      end.to_not change { ::File.exists?(filename) }
     end
 
     context "custom writer" do
@@ -37,13 +38,19 @@ describe MassiveSitemap do
       end
 
       it 'takes gzips writer' do
-        MassiveSitemap.generate(:base_url => 'test.de/', :gzip => true)
-        ::File.exists?(gz_filename).should be_true
+        expect do
+          MassiveSitemap.generate(:base_url => 'test.de/', :gzip => true) do
+             add "dummy"
+          end
+        end.to change { ::File.exists?(gz_filename) }.to(true)
       end
 
       it 'takes custom writer' do
-        MassiveSitemap.generate(:base_url => 'test.de/', :writer => MassiveSitemap::Writer::GzipFile)
-        ::File.exists?(gz_filename).should be_true
+        expect do
+          MassiveSitemap.generate(:base_url => 'test.de/', :writer => MassiveSitemap::Writer::GzipFile) do
+            add "dummy"
+          end
+        end.to change { ::File.exists?(gz_filename) }.to(true)
       end
     end
   end
@@ -97,20 +104,26 @@ describe MassiveSitemap do
     end
 
     it 'includes urls' do
-      MassiveSitemap.generate(:base_url => 'test.de/', :indent_by => 0).generate_index
+      MassiveSitemap.generate(:base_url => 'test.de/', :indent_by => 0) do
+        add "dummy"
+      end.generate_index
 
       output(index_filename).should include("<sitemap>\n<loc>http://test.de/sitemap.xml</loc>\n<lastmod>#{lastmod}</lastmod>\n</sitemap>")
     end
 
     it 'includes index base url' do
-      MassiveSitemap.generate(:base_url => 'test.de/', :index_base_url => 'index.de/').generate_index
+      MassiveSitemap.generate(:base_url => 'test.de/', :index_base_url => 'index.de/')  do
+        add "dummy"
+      end.generate_index
 
       output(index_filename).should include("<loc>http://index.de/sitemap.xml</loc>")
     end
 
     it 'overwrites existing one' do
       File.open(index_filename, 'w') {}
-      MassiveSitemap.generate(:base_url => 'test.de/', :index_base_url => 'index.de/').generate_index
+      MassiveSitemap.generate(:base_url => 'test.de/', :index_base_url => 'index.de/') do
+        add "dummy"
+      end.generate_index
 
       output(index_filename).should include("<loc>http://index.de/sitemap.xml</loc>")
     end
@@ -122,7 +135,9 @@ describe MassiveSitemap do
       end
 
       it 'creates sitemap file' do
-        MassiveSitemap.generate(:base_url => 'test.de/', :writer => MassiveSitemap::Writer::GzipFile).generate_index
+        MassiveSitemap.generate(:base_url => 'test.de/', :writer => MassiveSitemap::Writer::GzipFile) do
+          add "dummy"
+        end.generate_index
         ::File.exists?(gz_filename(index_filename)).should be_true
       end
     end

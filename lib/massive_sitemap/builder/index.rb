@@ -9,6 +9,8 @@ module MassiveSitemap
       }
 
       def add_url!(location, attrs = {})
+        init!
+
         tag! 'sitemap' do
           tag! 'loc', location
           tag! 'lastmod', attrs[:last_modified].utc.strftime('%Y-%m-%dT%H:%M:%S+00:00') if attrs[:last_modified]

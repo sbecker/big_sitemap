@@ -16,23 +16,43 @@ describe MassiveSitemap::Builder::Base do
     end
   end
 
-  context "in sequence" do
-    it 'seq: generate basic skeleton, opened' do
+  context "no content added" do
+    it 'empty per default' do
       builder
-      writer.string.should == header
+      writer.string.should == ""
     end
 
     it 'generate basic skeleton' do
+      builder.init!
+      writer.string.should == header
+    end
+
+    it 'generate basic skeleton on double init' do
+      builder.init!
+      builder.init!
+      writer.string.should == header
+    end
+
+    it 'generate nothing when not inited' do
       builder.close!
-      writer.string.should == %Q(#{header}\n</urlset>)
+      writer.string.should == ""
     end
 
     it "same result on double close" do
       builder.close!
       builder.close!
-      writer.string.should == %Q(#{header}\n</urlset>)
+      writer.string.should == ""
     end
 
+    it "same result on double close" do
+      builder.init!
+      builder.close!
+      builder.close!
+      writer.string.should == %Q(#{header}\n</urlset>)
+    end
+  end
+
+  context "adding content" do
     it 'seq: generate one url' do
       builder.add 'test'
       builder.close!
@@ -42,16 +62,15 @@ describe MassiveSitemap::Builder::Base do
 
   context "as block" do
     it 'generate basic skeleton' do
-      MassiveSitemap::Builder.new(writer) do
-      end
-      writer.string.should == %Q(#{header}\n</urlset>)
+      MassiveSitemap::Builder.new(writer)  {}
+      writer.string.should == ""
     end
 
     it 'generate one url' do
       MassiveSitemap::Builder.new(writer) do
-        add_url! 'test'
+        add 'test'
       end
-      writer.string.should == %Q(#{header}\n  <url>\n    <loc>test</loc>\n  </url>\n</urlset>)
+      writer.string.should == %Q(#{header}\n  <url>\n    <loc>/test</loc>\n  </url>\n</urlset>)
     end
 
     it 'generate one url, no indent' do
@@ -72,19 +91,10 @@ describe MassiveSitemap::Builder::Base do
     end
 
     it 'generate one url with attrs' do
-      MassiveSitemap::Builder.new(writer) do
+      MassiveSitemap::Builder.new(writer, :indent_by => 0) do
         add_url! 'test', :change_frequency => 'weekly', :priority => 0.8
       end
-      expect = <<-XML
-#{header}
-  <url>
-    <loc>test</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-</urlset>
-XML
-      writer.string.should == expect.strip
+      writer.string.should include("<loc>test</loc>\n<changefreq>weekly</changefreq>\n<priority>0.8</priority>")
     end
   end
 
