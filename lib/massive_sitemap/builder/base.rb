@@ -32,11 +32,11 @@ module MassiveSitemap
       rescue MassiveSitemap::Writer::File::FileExistsException => e
       end
 
-      def init!
+      def init!(&block)
         unless @inited
           @writer.init!
-          header!
           @inited = true
+          header!(&block)
         end
       end
 
@@ -53,9 +53,9 @@ module MassiveSitemap
       end
 
       private
-      def header!
+      def header!(&block)
         @writer.print '<?xml version="1.0" encoding="UTF-8"?>'
-        tag! self.class::HEADER_NAME, self.class::HEADER_ATTRIBUTES
+        tag! self.class::HEADER_NAME, self.class::HEADER_ATTRIBUTES, &block
       end
 
       def add_url!(location, attrs = {})

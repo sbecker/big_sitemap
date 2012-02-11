@@ -50,6 +50,13 @@ describe MassiveSitemap::Builder::Base do
       builder.close!
       writer.string.should == %Q(#{header}\n</urlset>)
     end
+
+    it "same result on double close" do
+      builder.init! do
+        add "test"
+      end
+      writer.string.should == %Q(#{header}\n  <url>\n    <loc>/test</loc>\n  </url>\n</urlset>)
+    end
   end
 
   context "adding content" do
