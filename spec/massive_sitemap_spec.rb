@@ -70,6 +70,15 @@ describe MassiveSitemap do
       output.should include("<loc>http://test.de/track/name</loc>")
     end
 
+    it "doesn't fail for existing file" do
+      File.open(filename, 'w') {}
+      expect do
+        MassiveSitemap.generate(:base_url => 'test.de/') do
+          add "/track/name"
+        end
+      end.to_not change { File.stat(filename).mtime }
+    end
+
     context 'nested generation' do
       it 'adds url of nested builder' do
         MassiveSitemap.generate(:base_url => 'test.de/') do

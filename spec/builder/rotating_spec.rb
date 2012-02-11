@@ -59,7 +59,7 @@ describe MassiveSitemap::Builder::Rotating do
           MassiveSitemap::Builder::Rotating.new(writer, :max_per_sitemap => 1) do
             begin
               add 'test'
-            rescue MassiveSitemap::Writer::File::FileExistsException
+            rescue MassiveSitemap::Writer::File::FileExistsException => e
             end
             add 'test2'
           end

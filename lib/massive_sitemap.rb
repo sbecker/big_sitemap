@@ -21,7 +21,6 @@ module MassiveSitemap
   DEFAULTS = {
     # builder
     :base_url        => nil,
-    :index_base_url  => nil,
     :indent_by       => 2,
 
     # writer
@@ -31,6 +30,7 @@ module MassiveSitemap
     :index_filename  => "sitemap_index.xml",
 
     # global
+    :index_base_url  => nil,
     :gzip            => false,
     :writer          => MassiveSitemap::Writer::File,
   }
@@ -49,21 +49,10 @@ module MassiveSitemap
 
     @writer = @options[:writer].new @options
 
-    generate_sitemap(&block)
-  end
-  module_function :generate
-
-  def generate_sitemap(&block)
-    begin
-      @builder = Builder::Rotating.new(@writer, @options)
-    rescue Writer::File::FileExistsException => e
-      # puts "Base: #{e.message}"
-    end
-    instance_eval(&block) if block
-    @builder.close!
+    Builder::Rotating.new(@writer, @options, &block)
     self
   end
-  module_function :generate_sitemap
+  module_function :generate
 
   # Create a sitemap index document
   def generate_index(files = nil)
@@ -79,9 +68,4 @@ module MassiveSitemap
     self
   end
   module_function :generate_index
-
-  def add(path, attrs = {})
-    @builder.add(path, attrs)
-  end
-  module_function :add
 end
