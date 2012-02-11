@@ -10,6 +10,10 @@ describe MassiveSitemap do
     `cat '#{file}'`
   end
 
+  def gz_filename(file = filename)
+    "#{file}.gz"
+  end
+
   after do
     FileUtils.rm(filename) rescue nil
     FileUtils.rm(filename2) rescue nil
@@ -28,8 +32,6 @@ describe MassiveSitemap do
     end
 
     context "gziped" do
-      let(:gz_filename) { "#{filename}.gz" }
-
       after do
         FileUtils.rm(gz_filename) rescue nil
       end
@@ -82,36 +84,42 @@ describe MassiveSitemap do
   end
 
   describe "#generate_index" do
-    let(:index_file) { 'sitemap_index.xml' }
-    let(:lastmod) { File.stat(index_file).mtime.utc.strftime('%Y-%m-%dT%H:%M:%S+00:00') }
+    let(:index_filename) { 'sitemap_index.xml' }
+    let(:lastmod) { File.stat(index_filename).mtime.utc.strftime('%Y-%m-%dT%H:%M:%S+00:00') }
 
     after do
-      FileUtils.rm(index_file) rescue nil
+      FileUtils.rm(index_filename) rescue nil
     end
 
     it 'includes urls' do
-      MassiveSitemap.generate(:base_url => 'test.de/', :indent_by => 0) do
-        add "/set/name"
-      end.generate_index
+      MassiveSitemap.generate(:base_url => 'test.de/', :indent_by => 0).generate_index
 
-      output(index_file).should include("<sitemap>\n<loc>http://test.de/sitemap.xml</loc>\n<lastmod>#{lastmod}</lastmod>\n</sitemap>")
+      output(index_filename).should include("<sitemap>\n<loc>http://test.de/sitemap.xml</loc>\n<lastmod>#{lastmod}</lastmod>\n</sitemap>")
     end
 
     it 'includes index base url' do
-      MassiveSitemap.generate(:base_url => 'test.de/', :index_base_url => 'index.de/') do
-        add "/set/name"
-      end.generate_index
+      MassiveSitemap.generate(:base_url => 'test.de/', :index_base_url => 'index.de/').generate_index
 
-      output(index_file).should include("<loc>http://index.de/sitemap.xml</loc>")
+      output(index_filename).should include("<loc>http://index.de/sitemap.xml</loc>")
     end
 
     it 'overwrites existing one' do
-      File.open(index_file, 'w') {}
-      MassiveSitemap.generate(:base_url => 'test.de/', :index_base_url => 'index.de/') do
-        add "/set/name"
-      end.generate_index
+      File.open(index_filename, 'w') {}
+      MassiveSitemap.generate(:base_url => 'test.de/', :index_base_url => 'index.de/').generate_index
 
-      output(index_file).should include("<loc>http://index.de/sitemap.xml</loc>")
+      output(index_filename).should include("<loc>http://index.de/sitemap.xml</loc>")
+    end
+
+    context "gziped" do
+      after do
+        FileUtils.rm(gz_filename(index_filename)) rescue nil
+        FileUtils.rm(gz_filename) rescue nil
+      end
+
+      it 'creates sitemap file' do
+        MassiveSitemap.generate(:base_url => 'test.de/', :writer => MassiveSitemap::Writer::GzipFile).generate_index
+        ::File.exists?(gz_filename(index_filename)).should be_true
+      end
     end
   end
 end
