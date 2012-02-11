@@ -27,11 +27,20 @@ module MassiveSitemap
         add_url! File.join(base_url, path), attrs
       end
 
-      def init!(&block) #_init_document
+      def init!(&block)
         @writer.init!
         header!(&block)
       end
 
+      def close!(indent = true)
+        if name = @opened_tags.pop
+          @writer.print "\n" + ' ' * options[:indent_by] * @opened_tags.size if indent
+          @writer.print "</#{name}>"
+          @writer.close! if @opened_tags.size == 0
+        end
+      end
+
+      private
       def header!(&block)
         @opened_tags = []
         @writer.print '<?xml version="1.0" encoding="UTF-8"?>'
@@ -47,7 +56,7 @@ module MassiveSitemap
         end
       end
 
-      def tag!(name, content = nil, attrs = {}, &block) # _tag
+      def tag!(name, content = nil, attrs = {}, &block)
         attrs = content if content.is_a? Hash
         open!(name, attrs)
         if content.is_a? String
@@ -61,25 +70,19 @@ module MassiveSitemap
         end
       end
 
-      def open!(name, attrs = {}) #_open_tag
+      def open!(name, attrs = {})
         attrs = attrs.map { |attr, value| %Q( #{attr}="#{value}") }.join('')
         @writer.print "\n" + ' ' * options[:indent_by] * @opened_tags.size
         @opened_tags << name
         @writer.print "<#{name}#{attrs}>"
       end
 
-      def close!(indent = true) #_close_tag / #_close_document
-        if name = @opened_tags.pop
-          @writer.print "\n" + ' ' * options[:indent_by] * @opened_tags.size if indent
-          @writer.print "</#{name}>"
-          @writer.close! if @opened_tags.size == 0
-        end
-      end
-
       private
       def base_url
         schema, host = @options[:base_url].scan(/^(https?:\/\/)?(.+?)\/?$/).flatten
         "#{schema || 'http://'}#{host}/"
+      rescue
+         ""
       end
     end
   end

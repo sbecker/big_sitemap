@@ -1,10 +1,6 @@
 require 'fileutils'
 
 # Write into File
-# On rotation, close current file, and reopen a new one
-# with same file name but -<counter> appendend
-#
-# TODO what if file exists?, overwrite flag??
 
 module MassiveSitemap
   module Writer
@@ -51,9 +47,9 @@ module MassiveSitemap
         @stream.print(string)
       end
 
-      #private
+      private
       def filename
-        @options[:filename]
+        ::File.join @options[:document_full], @options[:filename]
       end
 
       def tmp_filename

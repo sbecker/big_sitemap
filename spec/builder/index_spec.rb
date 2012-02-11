@@ -10,8 +10,8 @@ describe MassiveSitemap::Builder::Index do
 
   it 'Index: generate one url' do
     MassiveSitemap::Builder::Index.new(writer, :indent_by => 0) do
-      add_url! 'test'
+      add 'test'
     end
-    writer.string.should == %Q(#{INDEX_HEADER}\n<loc>test</loc>\n</sitemap>\n</sitemapindex>)
+    writer.string.should == %Q(#{INDEX_HEADER}\n<loc>/test</loc>\n</sitemap>\n</sitemapindex>)
   end
 end

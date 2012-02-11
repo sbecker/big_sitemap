@@ -12,22 +12,50 @@ describe MassiveSitemap::Writer::File do
     FileUtils.rm(filename2) rescue nil
   end
 
-  # it 'wrong template' do
-  #   filename = 'test'
-  #    MassiveSitemap::Writer::File.new(filename)
-  # end
+  describe "document_full" do
+    let(:folder) { "test" }
+
+    before do
+      Dir.mkdir(folder) unless ::File.exists?(folder)
+    end
+
+    after do
+      FileUtils.rm_rf(folder) rescue nil
+    end
+
+    it 'appends document_full' do
+      expect do
+        MassiveSitemap::Writer::File.new(:document_full => folder).tap do |w|
+          w.init!
+          w.close!
+        end
+      end.to change { File.exists?("test/#{filename}") }.to(true)
+    end
+
+    it 'appends document_full' do
+      expect do
+        MassiveSitemap::Writer::File.new(:document_full => "#{folder}/").tap do |w|
+          w.init!
+          w.close!
+        end
+      end.to change { File.exists?("test/#{filename}") }.to(true)
+    end
+  end
 
   it 'create file' do
-    writer.close!
-    File.exists?(filename).should be_true
+    expect do
+      writer.close!
+    end.to change { File.exists?(filename) }.to(true)
   end
 
   it 'create second file on rotation' do
-    writer.close!
-    File.exists?(filename).should be_true
-    writer.init!(:filename => filename2)
-    writer.close!
-    File.exists?(filename2).should be_true
+    expect do
+      expect do
+        writer.close!
+      end.to change { File.exists?(filename) }.to(true)
+      writer.init!(:filename => filename2)
+      writer.close!
+    end.to change { File.exists?(filename2) }.to(true)
   end
 
   it 'write into file' do

@@ -17,6 +17,8 @@ module MassiveSitemap
         super
       end
 
+      # On rotation, close current file, and reopen a new one
+      # with same file name but -<counter> appendend
       def init!(&block) #_init_document
         @urls = 0
         @writer.init! :filename => filename_with_rotation(@writer.options[:filename], @rotations)

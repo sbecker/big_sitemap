@@ -34,9 +34,9 @@ describe MassiveSitemap::Builder::Base do
     end
 
     it 'seq: generate one url' do
-      builder.add_url! 'test'
+      builder.add 'test'
       builder.close!
-      writer.string.should == %Q(#{header}\n  <url>\n    <loc>test</loc>\n  </url>\n</urlset>)
+      writer.string.should == %Q(#{header}\n  <url>\n    <loc>/test</loc>\n  </url>\n</urlset>)
     end
   end
 
