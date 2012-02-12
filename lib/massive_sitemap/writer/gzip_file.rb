@@ -7,10 +7,8 @@ module MassiveSitemap
   module Writer
 
     class GzipFile < File
-      # API
-      def init!(options = {})
-        super
-        @stream = ::Zlib::GzipWriter.new(@stream)
+      def open_stream
+        ::Zlib::GzipWriter.new(super)
       end
 
       private

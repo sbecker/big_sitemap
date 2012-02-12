@@ -33,9 +33,8 @@ module MassiveSitemap
       end
 
       def init!(&block)
-        unless @inited
+        unless @writer.inited?
           @writer.init!
-          @inited = true
           header!(&block)
         end
       end
@@ -46,7 +45,6 @@ module MassiveSitemap
           @writer.print "</#{name}>"
           if @opened_tags.size == 0
             @writer.close!
-            @inited = false
             true
           end
         end

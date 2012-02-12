@@ -56,10 +56,9 @@ module MassiveSitemap
 
   # Create a sitemap index document
   def generate_index(files = nil)
-    files ||= Dir[File.join(@options[:document_full], "*.{xml,xml.gz}")]
-
     @writer.options.merge!(:filename => @options[:index_filename], :force_overwrite => true)
     Builder::Index.new(@writer, @options.merge(:base_url => @options[:index_base_url])) do
+      files ||= Dir[File.join(@options[:document_full], "*.{xml,xml.gz}")]
       files.each do |path|
         next if path.include?(@options[:index_filename])
         add ::File.basename(path), :last_modified => File.stat(path).mtime

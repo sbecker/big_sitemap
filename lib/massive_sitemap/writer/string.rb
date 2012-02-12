@@ -1,24 +1,27 @@
 require 'stringio'
+require "massive_sitemap/writer/base"
 
 # Write into String
 # Perfect for testing porpuses
-
 module MassiveSitemap
   module Writer
 
-    class String < StringIO
-      attr_reader :options
+    class String < Base
 
-      def initialize(options = {})
-        @options = options
-        super()
+      def open_stream
+        @string ||= StringIO.new
       end
 
-      # API
-      def init!(options = {}) # do noting
+      def to_s
+        @string.string rescue ""
       end
 
-      def close! # do noting
+      def ==(other_string)
+        to_s == other_string
+      end
+
+      def include?(other_string)
+        to_s.include?(other_string)
       end
     end
 

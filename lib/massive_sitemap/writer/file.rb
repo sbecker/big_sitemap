@@ -1,10 +1,11 @@
 require 'fileutils'
+require "massive_sitemap/writer/base"
 
 # Write into File
 
 module MassiveSitemap
   module Writer
-    class File
+    class File < Base
 
       class FileExistsException < IOError; end
 
@@ -15,41 +16,27 @@ module MassiveSitemap
         :index_filename  => "sitemap_index.xml",
       }
 
-      attr_reader :options
-
-      def initialize(options = {})
-        @options = OPTS.merge(options)
-        @stream  = nil
+      def open_stream
+        ::File.open(tmp_filename, 'w:ASCII-8BIT')
       end
 
-      # API
-      def init!(options = {})
-        close!
-        @options.merge!(options)
-        if @options[:force_overwrite] || !::File.exists?(filename)
-          @stream = ::File.open(tmp_filename, 'w:ASCII-8BIT')
-        else
+      def close_stream(stream)
+        stream.close
+        # Move from tmp_file into acutal file
+        ::File.delete(filename) if ::File.exists?(filename)
+        ::File.rename(tmp_filename, filename)
+      end
+
+      def init?
+        if !options[:force_overwrite] && ::File.exists?(filename)
           raise FileExistsException, "Can not create file: #{filename} exits"
         end
-      end
-
-      def close!
-        if @stream
-          @stream.close
-          @stream = nil
-          # Move from tmp_file into acutal file
-          ::File.delete(filename) if ::File.exists?(filename)
-          ::File.rename(tmp_filename, filename)
-        end
-      end
-
-      def print(string)
-        @stream.print(string) if @stream
+        true
       end
 
       private
       def filename
-        ::File.join @options[:document_full], @options[:filename]
+        ::File.join options[:document_full], options[:filename]
       end
 
       def tmp_filename

@@ -19,43 +19,44 @@ describe MassiveSitemap::Builder::Base do
   context "no content added" do
     it 'empty per default' do
       builder
-      writer.string.should == ""
+
+      writer.should == ""
     end
 
     it 'generate basic skeleton' do
       builder.init!
-      writer.string.should == header
+      writer.should == header
     end
 
     it 'generate basic skeleton on double init' do
       builder.init!
       builder.init!
-      writer.string.should == header
+      writer.should == header
     end
 
     it 'generate nothing when not inited' do
       builder.close!
-      writer.string.should == ""
+      writer.should == ""
     end
 
     it "same result on double close" do
       builder.close!
       builder.close!
-      writer.string.should == ""
+      writer.should == ""
     end
 
     it "same result on double close" do
       builder.init!
       builder.close!
       builder.close!
-      writer.string.should == %Q(#{header}\n</urlset>)
+      writer.should == %Q(#{header}\n</urlset>)
     end
 
     it "same result on double close" do
       builder.init! do
         add "test"
       end
-      writer.string.should == %Q(#{header}\n  <url>\n    <loc>/test</loc>\n  </url>\n</urlset>)
+      writer.should == %Q(#{header}\n  <url>\n    <loc>/test</loc>\n  </url>\n</urlset>)
     end
   end
 
@@ -63,45 +64,68 @@ describe MassiveSitemap::Builder::Base do
     it 'seq: generate one url' do
       builder.add 'test'
       builder.close!
-      writer.string.should == %Q(#{header}\n  <url>\n    <loc>/test</loc>\n  </url>\n</urlset>)
+      writer.should == %Q(#{header}\n  <url>\n    <loc>/test</loc>\n  </url>\n</urlset>)
     end
   end
 
   context "as block" do
     it 'generate basic skeleton' do
       MassiveSitemap::Builder.new(writer)  {}
-      writer.string.should == ""
+      writer.should == ""
     end
 
     it 'generate one url' do
       MassiveSitemap::Builder.new(writer) do
         add 'test'
       end
-      writer.string.should == %Q(#{header}\n  <url>\n    <loc>/test</loc>\n  </url>\n</urlset>)
+      writer.should == %Q(#{header}\n  <url>\n    <loc>/test</loc>\n  </url>\n</urlset>)
+    end
+
+    it 'generate one url with init!' do
+      MassiveSitemap::Builder.new(writer) do
+        init!
+        add 'test'
+      end
+      writer.should == %Q(#{header}\n  <url>\n    <loc>/test</loc>\n  </url>\n</urlset>)
+    end
+
+    it 'generate one url with init! block' do
+      MassiveSitemap::Builder.new(writer) do
+        init! do
+          add 'test'
+        end
+      end
+      writer.should == %Q(#{header}\n  <url>\n    <loc>/test</loc>\n  </url>\n</urlset>)
+    end
+
+    it 'generate one url with close!' do
+      MassiveSitemap::Builder.new(writer) do
+        add 'test'
+        close!
+      end
+      writer.should == %Q(#{header}\n  <url>\n    <loc>/test</loc>\n  </url>\n</urlset>)
     end
 
     it 'generate one url, no indent' do
       MassiveSitemap::Builder.new(writer, :indent_by => 0) do
         add_url! 'test'
       end
-      writer.string.should == %Q(#{header}\n<url>\n<loc>test</loc>\n</url>\n</urlset>)
+      writer.should == %Q(#{header}\n<url>\n<loc>test</loc>\n</url>\n</urlset>)
     end
 
     it 'generate two url' do
-      writer.should_receive(:init!).once
-      writer.should_receive(:close!).once
       MassiveSitemap::Builder.new(writer) do
         add_url! 'test'
         add_url! 'test2'
       end
-      writer.string.should == %Q(#{header}\n  <url>\n    <loc>test</loc>\n  </url>\n  <url>\n    <loc>test2</loc>\n  </url>\n</urlset>)
+      writer.should == %Q(#{header}\n  <url>\n    <loc>test</loc>\n  </url>\n  <url>\n    <loc>test2</loc>\n  </url>\n</urlset>)
     end
 
     it 'generate one url with attrs' do
       MassiveSitemap::Builder.new(writer, :indent_by => 0) do
         add_url! 'test', :change_frequency => 'weekly', :priority => 0.8
       end
-      writer.string.should include("<loc>test</loc>\n<changefreq>weekly</changefreq>\n<priority>0.8</priority>")
+      writer.should include("<loc>test</loc>\n<changefreq>weekly</changefreq>\n<priority>0.8</priority>")
     end
   end
 

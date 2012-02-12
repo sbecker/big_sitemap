@@ -11,7 +11,7 @@
   * updated Docu
   * switch to writer chain
 
-## v2.0.1 - 9-02-2012
+## v2.0.0 - 13-02-2012
   _inital release_
 
   * restructured gem completely based on BigSitemap gem
@@ -24,3 +24,4 @@
   * writer overwrite detection
   * added Index generation
   * don't init new writer all the time
+  * move inited status to writer

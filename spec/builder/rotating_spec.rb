@@ -18,17 +18,15 @@ describe MassiveSitemap::Builder::Rotating do
     MassiveSitemap::Builder::Rotating.new(writer) do
       add_url! 'test'
     end
-    writer.string.should == %Q(#{header}\n  <url>\n    <loc>test</loc>\n  </url>\n</urlset>)
+    writer.should == %Q(#{header}\n  <url>\n    <loc>test</loc>\n  </url>\n</urlset>)
   end
 
   it 'generates two url' do
-    writer.should_receive(:init!).twice
-    writer.should_receive(:close!).twice
     MassiveSitemap::Builder::Rotating.new(writer, :max_per_sitemap => 1) do
       add_url! 'test'
       add_url! 'test2'
     end
-    writer.string.should == %Q(#{header}\n  <url>\n    <loc>test</loc>\n  </url>\n</urlset>#{header}\n  <url>\n    <loc>test2</loc>\n  </url>\n</urlset>)
+    writer.should == %Q(#{header}\n  <url>\n    <loc>test</loc>\n  </url>\n</urlset>#{header}\n  <url>\n    <loc>test2</loc>\n  </url>\n</urlset>)
   end
 
   context "with file" do
