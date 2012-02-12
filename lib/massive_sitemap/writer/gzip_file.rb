@@ -7,6 +7,8 @@ module MassiveSitemap
   module Writer
 
     class GzipFile < File
+      OPTS = File::OPTS
+
       def open_stream
         ::Zlib::GzipWriter.new(super)
       end

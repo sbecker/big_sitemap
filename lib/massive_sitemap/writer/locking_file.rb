@@ -7,6 +7,8 @@ module MassiveSitemap
   module Writer
 
     class LockingFile < File
+      OPTS = File::OPTS
+
       LOCK_FILE = 'generator.lock'
 
       def open_stream

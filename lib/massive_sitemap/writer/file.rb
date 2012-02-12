@@ -9,14 +9,16 @@ module MassiveSitemap
 
       class FileExistsException < IOError; end
 
-      OPTS = {
+      OPTS = Base::OPTS.merge(
         :document_full   => '.',
         :force_overwrite => false,
         :filename        => "sitemap.xml",
         :index_filename  => "sitemap_index.xml",
-      }
+      )
 
       def open_stream
+        dir = ::File.dirname(tmp_filename)
+        Dir.mkdir(dir) unless ::File.exists?(dir)
         ::File.open(tmp_filename, 'w:ASCII-8BIT')
       end
 
