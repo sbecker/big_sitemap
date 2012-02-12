@@ -36,6 +36,7 @@ describe MassiveSitemap do
 
     context "custom writer" do
       after do
+        FileUtils.rm(gz_filename(index_filename)) rescue nil
         FileUtils.rm(gz_filename) rescue nil
       end
 
@@ -109,6 +110,11 @@ describe MassiveSitemap do
   describe "#generate_index" do
     let(:lastmod) { File.stat(index_filename).mtime.utc.strftime('%Y-%m-%dT%H:%M:%S+00:00') }
 
+    it "does not create empty files" do
+      MassiveSitemap.generate(:base_url => 'test.de/')
+      ::File.exists?(index_filename).should be_false
+    end
+
     it 'includes urls' do
       MassiveSitemap.generate(:base_url => 'test.de/', :indent_by => 0) do
         add "dummy"
@@ -141,10 +147,11 @@ describe MassiveSitemap do
       end
 
       it 'creates sitemap file' do
-        MassiveSitemap.generate(:base_url => 'test.de/', :writer => MassiveSitemap::Writer::GzipFile) do
-          add "dummy"
-        end
-        ::File.exists?(gz_filename(index_filename)).should be_true
+        expect do
+          MassiveSitemap.generate(:base_url => 'test.de/', :writer => MassiveSitemap::Writer::GzipFile) do
+            add "dummy"
+          end
+        end.to change { ::File.exists?(gz_filename(index_filename)) }.to(true)
       end
     end
   end
