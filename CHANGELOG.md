@@ -2,14 +2,12 @@
 
 ## vx.x.x - ???
 
-  * Amazon S3 integration
-  * manifest handling
-
 ## v2.0.x - ???
 
   * updated/fixed Ping
   * updated Docu
   * switch to writer chain
+  * add BigSitemap API
 
 ## v2.0.0 - 13-02-2012
   _inital release_
@@ -26,3 +24,5 @@
   * don't init new writer all the time
   * move inited status to writer
   * move index build into indexer and resource handling/selection into writer
+  * manifest handling:
+  * moved Amazon S3 integration to [massive_sitemap-writer-s3](https://github.com/rngtng/massive_sitemap-writer-s3)

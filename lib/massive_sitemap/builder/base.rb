@@ -27,6 +27,10 @@ module MassiveSitemap
         end
       end
 
+      def self.generate(writer, options = {}, &block)
+        self.new(writer, options, &block)
+      end
+
       def add(path, attrs = {})
         add_url! File.join(base_url, path), attrs
       rescue MassiveSitemap::Writer::File::FileExistsException => e
