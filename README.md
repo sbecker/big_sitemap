@@ -9,6 +9,13 @@ It implements various generation stategies, e.g. to split large Sitemaps into mu
 
 ## Usage
 
+```ruby
+  index_url = MassiveSitemap.generate(:url => 'test.de/') do
+    add "dummy"
+  end
+  MassiveSitemap.ping(index_url)
+```
+
 * clear structure
 * allows extension (S3)
 
