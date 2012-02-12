@@ -38,8 +38,6 @@ module MassiveSitemap
     end
     @options[:index_base_url] ||= @options[:base_url]
 
-    Dir.mkdir(@options[:document_full]) unless ::File.exists?(@options[:document_full])
-
     @options[:writer] = MassiveSitemap::Writer::GzipFile if @options[:gzip]
 
     @writer = @options[:writer].new @options

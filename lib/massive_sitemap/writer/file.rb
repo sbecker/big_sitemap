@@ -1,5 +1,5 @@
 require 'fileutils'
-require "massive_sitemap/writer/base"
+require 'massive_sitemap/writer/base'
 
 # Write into File
 
@@ -17,8 +17,9 @@ module MassiveSitemap
       )
 
       def open_stream
-        dir = ::File.dirname(tmp_filename)
-        Dir.mkdir(dir) unless ::File.exists?(dir)
+        ::File.dirname(tmp_filename).tap do |dir|
+          FileUtils.mkdir_p(dir) unless ::File.exists?(dir)
+        end
         ::File.open(tmp_filename, 'w:ASCII-8BIT')
       end
 

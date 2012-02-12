@@ -13,32 +13,37 @@ describe MassiveSitemap::Writer::File do
   end
 
   describe "document_full" do
-    let(:folder) { "test" }
-
-    before do
-      Dir.mkdir(folder) unless ::File.exists?(folder)
-    end
+    let(:document_full) { "test/test2" }
 
     after do
-      FileUtils.rm_rf(folder) rescue nil
+      FileUtils.rm_rf(document_full) rescue nil
+    end
+
+    it 'mkdir_p folder' do
+      expect do
+        MassiveSitemap::Writer::File.new(:document_full => document_full).tap do |w|
+          w.init!
+          w.close!
+        end
+      end.to change { File.exists?(document_full) }.to(true)
     end
 
     it 'appends document_full' do
       expect do
-        MassiveSitemap::Writer::File.new(:document_full => folder).tap do |w|
+        MassiveSitemap::Writer::File.new(:document_full => document_full).tap do |w|
           w.init!
           w.close!
         end
-      end.to change { File.exists?("test/#{filename}") }.to(true)
+      end.to change { File.exists?("#{document_full}/#{filename}") }.to(true)
     end
 
     it 'appends document_full' do
       expect do
-        MassiveSitemap::Writer::File.new(:document_full => "#{folder}/").tap do |w|
+        MassiveSitemap::Writer::File.new(:document_full => "#{document_full}/").tap do |w|
           w.init!
           w.close!
         end
-      end.to change { File.exists?("test/#{filename}") }.to(true)
+      end.to change { File.exists?("#{document_full}/#{filename}") }.to(true)
     end
   end
 
