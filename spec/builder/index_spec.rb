@@ -18,8 +18,8 @@ describe MassiveSitemap::Builder::Index do
     writer.should == %Q(#{INDEX_HEADER}\n<loc>/test</loc>\n</sitemap>\n</sitemapindex>)
   end
 
-  it 'include base_url' do
-    MassiveSitemap::Builder::Index.new(writer, :base_url => "test.de", :indent_by => 0)
+  it 'include url' do
+    MassiveSitemap::Builder::Index.new(writer, :url => "test.de", :indent_by => 0)
     writer.should include("<loc>http://test.de/test</loc>")
   end
 

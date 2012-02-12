@@ -10,7 +10,7 @@ module MassiveSitemap
       class FileExistsException < IOError; end
 
       OPTS = Base::OPTS.merge(
-        :document_full   => '.',
+        :root            => '.',
         :force_overwrite => false,
         :filename        => "sitemap.xml",
         :index_filename  => "sitemap_index.xml",
@@ -46,7 +46,7 @@ module MassiveSitemap
 
       private
       def filename
-        ::File.join options[:document_full], options[:filename]
+        ::File.join options[:root], options[:filename]
       end
 
       def tmp_filename
@@ -54,7 +54,7 @@ module MassiveSitemap
       end
 
       def files
-        Dir[::File.join(options[:document_full], "*.xml")]
+        Dir[::File.join(options[:root], "*.xml")]
       end
     end
 

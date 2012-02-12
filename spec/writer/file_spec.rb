@@ -12,38 +12,38 @@ describe MassiveSitemap::Writer::File do
     FileUtils.rm(filename2) rescue nil
   end
 
-  describe "document_full" do
-    let(:document_full) { "test/test2" }
+  describe "root" do
+    let(:root) { "test/test2" }
 
     after do
-      FileUtils.rm_rf(document_full) rescue nil
+      FileUtils.rm_rf(root) rescue nil
     end
 
     it 'mkdir_p folder' do
       expect do
-        MassiveSitemap::Writer::File.new(:document_full => document_full).tap do |w|
+        MassiveSitemap::Writer::File.new(:root => root).tap do |w|
           w.init!
           w.close!
         end
-      end.to change { File.exists?(document_full) }.to(true)
+      end.to change { File.exists?(root) }.to(true)
     end
 
-    it 'appends document_full' do
+    it 'appends root' do
       expect do
-        MassiveSitemap::Writer::File.new(:document_full => document_full).tap do |w|
+        MassiveSitemap::Writer::File.new(:root => root).tap do |w|
           w.init!
           w.close!
         end
-      end.to change { File.exists?("#{document_full}/#{filename}") }.to(true)
+      end.to change { File.exists?("#{root}/#{filename}") }.to(true)
     end
 
-    it 'appends document_full' do
+    it 'appends root' do
       expect do
-        MassiveSitemap::Writer::File.new(:document_full => "#{document_full}/").tap do |w|
+        MassiveSitemap::Writer::File.new(:root => "#{root}/").tap do |w|
           w.init!
           w.close!
         end
-      end.to change { File.exists?("#{document_full}/#{filename}") }.to(true)
+      end.to change { File.exists?("#{root}/#{filename}") }.to(true)
     end
   end
 

@@ -4,7 +4,6 @@
 
 ## v2.0.x - ???
 
-  * updated/fixed Ping
   * updated Docu
   * switch to writer chain
   * add BigSitemap API
@@ -26,3 +25,4 @@
   * move index build into indexer and resource handling/selection into writer
   * manifest handling:
   * moved Amazon S3 integration to [massive_sitemap-writer-s3](https://github.com/rngtng/massive_sitemap-writer-s3)
+  * updated/fixed Ping

@@ -17,13 +17,13 @@ describe MassiveSitemap::Writer::GzipFile do
     end.to change { File.exists?(gz_filename) }.to(true)
   end
 
-  context "with document_full" do
-    let(:document_full) { "sitemap"}
+  context "with root" do
+    let(:root) { "sitemap"}
 
-    let(:writer) { MassiveSitemap::Writer::GzipFile.new(:document_full => document_full).tap { |w| w.init! } }
+    let(:writer) { MassiveSitemap::Writer::GzipFile.new(:root => root).tap { |w| w.init! } }
 
     after do
-      FileUtils.rm_rf(document_full) rescue nil
+      FileUtils.rm_rf(root) rescue nil
     end
 
     it 'creates gzip file in document root' do

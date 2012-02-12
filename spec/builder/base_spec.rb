@@ -129,7 +129,7 @@ describe MassiveSitemap::Builder::Base do
     end
   end
 
-  describe ".base_url" do
+  describe ".url" do
     URLS = %w(
       http://test.de/
       test.de/
@@ -138,12 +138,12 @@ describe MassiveSitemap::Builder::Base do
 
     URLS.each do |url|
       it "transforms to valid url" do
-        MassiveSitemap::Builder.new(writer, :base_url => url).send(:base_url).should == "http://test.de/"
+        MassiveSitemap::Builder.new(writer, :url => url).send(:url).should == "http://test.de/"
       end
     end
 
     it "transforms to valid url with https" do
-      MassiveSitemap::Builder.new(writer, :base_url => "https://test.de/").send(:base_url).should == "https://test.de/"
+      MassiveSitemap::Builder.new(writer, :url => "https://test.de/").send(:url).should == "https://test.de/"
     end
   end
 end

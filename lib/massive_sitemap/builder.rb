@@ -2,7 +2,7 @@ require "massive_sitemap/builder/base"
 
 module MassiveSitemap
   module Builder
-
+    #shortcut
     def new(writer, options = {}, &block)
       Base.new(writer, options, &block)
     end

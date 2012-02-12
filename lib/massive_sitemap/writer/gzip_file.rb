@@ -19,7 +19,7 @@ module MassiveSitemap
       end
 
       def files
-        Dir[::File.join(options[:document_full], "*.xml.gz")]
+        Dir[::File.join(options[:root], "*.xml.gz")]
       end
     end
   end

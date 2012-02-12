@@ -3,22 +3,20 @@ module MassiveSitemap
 
     class Base
       OPTS = {
-        :base_url  => nil,
+        :url       => nil,
         :indent_by => 2
       }
 
-      HEADER_NAME = 'urlset'
+      HEADER_NAME       = 'urlset'
       HEADER_ATTRIBUTES = {
-        'xmlns' => 'http://www.sitemaps.org/schemas/sitemap/0.9',
-        'xmlns:xsi' => "http://www.w3.org/2001/XMLSchema-instance",
+        'xmlns'              => 'http://www.sitemaps.org/schemas/sitemap/0.9',
+        'xmlns:xsi'          => "http://www.w3.org/2001/XMLSchema-instance",
         'xsi:schemaLocation' => "http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"
       }
 
-      attr_reader :options
-
       def initialize(writer, options = {}, &block)
         @writer      = writer
-        @options     = OPTS.merge(options)
+        @options     = self.class::OPTS.merge(options)
         @opened_tags = []
 
         if block
@@ -32,7 +30,7 @@ module MassiveSitemap
       end
 
       def add(path, attrs = {})
-        add_url! File.join(base_url, path), attrs
+        add_url! File.join(url, path), attrs
       rescue MassiveSitemap::Writer::File::FileExistsException => e
       end
 
@@ -45,7 +43,7 @@ module MassiveSitemap
 
       def close!(indent = true)
         if name = @opened_tags.pop
-          @writer.print "\n" + ' ' * options[:indent_by] * @opened_tags.size if indent
+          @writer.print "\n" + ' ' * @options[:indent_by] * @opened_tags.size if indent
           @writer.print "</#{name}>"
           if @opened_tags.size == 0
             @writer.close!
@@ -87,14 +85,14 @@ module MassiveSitemap
 
       def open!(name, attrs = {})
         attrs = attrs.map { |attr, value| %Q( #{attr}="#{value}") }.join('')
-        @writer.print "\n" + ' ' * options[:indent_by] * @opened_tags.size
+        @writer.print "\n" + ' ' * @options[:indent_by] * @opened_tags.size
         @opened_tags << name
         @writer.print "<#{name}#{attrs}>"
       end
 
       private
-      def base_url
-        schema, host = @options[:base_url].scan(/^(https?:\/\/)?(.+?)\/?$/).flatten
+      def url
+        schema, host = @options[:url].scan(/^(https?:\/\/)?(.+?)\/?$/).flatten
         "#{schema || 'http://'}#{host}/"
       rescue
          ""

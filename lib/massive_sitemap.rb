@@ -2,49 +2,53 @@ require 'massive_sitemap/writer/file'
 require 'massive_sitemap/writer/gzip_file'
 require 'massive_sitemap/builder/rotating'
 require 'massive_sitemap/builder/index'
+require 'massive_sitemap/ping'
 
-# Page at -> <base_url>
+# Page at -> <url>
 # http://example.de/dir/
 
-# Index at
+# Index at -> <index_url>
 # http://sitemap.example.de/index-dir/
 
-# Save at -> <document_full>
+# Save at -> <root>
 # /root/dir/ ->  <document_root>/<document_path>
 
 module MassiveSitemap
   DEFAULTS = {
     # global
-    :index_base_url  => nil,
+    :index_url       => nil,
     :gzip            => false,
     :writer          => MassiveSitemap::Writer::File,
 
     # writer
-    :document_full   => '.',
+    :root            => '.',
     :force_overwrite => false,
     :filename        => "sitemap.xml",
     :index_filename  => "sitemap_index.xml",
 
     # builder
-    :base_url        => nil,
+    :url             => nil,
     :indent_by       => 2,
   }
 
   def generate(options = {}, &block)
     @options = DEFAULTS.merge options
 
-    unless @options[:base_url]
-      raise ArgumentError, 'you must specify ":base_url" string'
+    unless @options[:url]
+      raise ArgumentError, 'you must specify ":url" string'
     end
-    @options[:index_base_url] ||= @options[:base_url]
+    @options[:index_url] ||= @options[:url]
 
-    @options[:writer] = MassiveSitemap::Writer::GzipFile if @options[:gzip]
+    @options[:writer] = Writer::GzipFile if @options[:gzip]
 
     @writer = @options[:writer].new @options
     Builder::Rotating.generate(@writer, @options, &block)
 
     @writer.options.merge!(:filename => @options[:index_filename], :force_overwrite => true)
-    Builder::Index.generate(@writer, @options.merge(:base_url => @options[:index_base_url]))
+    Builder::Index.generate(@writer, @options.merge(:url => @options[:index_url]))
+
+    ping( ::File.join(@options[:index_url], @options[:index_filename]) )
   end
   module_function :generate
+
 end

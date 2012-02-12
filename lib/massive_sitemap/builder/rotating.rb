@@ -6,12 +6,15 @@ module MassiveSitemap
     class Rotating < Base
       NUM_URLS = 1..50_000
 
-      def initialize(writer, options = {}, &block)
-        @max_urls  = options[:max_per_sitemap] || NUM_URLS.max
-        @rotations = 0
-        @urls = 0
+      OPTS = Base::OPTS.merge(
+        :max_per_sitemap => NUM_URLS.max
+      )
 
-        unless NUM_URLS.member?(@max_urls)
+      def initialize(writer, options = {}, &block)
+        @rotations = 0
+        @urls      = 0
+
+        if options[:max_per_sitemap] && !NUM_URLS.member?(options[:max_per_sitemap])
           raise ArgumentError, %Q(":max_per_sitemap" must be greater than #{NUM_URLS.min} and smaller than #{NUM_URLS.max})
         end
 
@@ -22,7 +25,7 @@ module MassiveSitemap
       # with same file name but -<counter> appendend
       def init!(&block)
         unless @writer.inited?
-          @urls = 0
+          @urls    = 0
           filename = filename_with_rotation(@writer.options[:filename], @rotations)
           @rotations += 1
           @writer.init! :filename => filename
@@ -31,7 +34,7 @@ module MassiveSitemap
       end
 
       def add_url!(location, attrs = {})
-        if @urls >= @max_urls
+        if @urls >= @options[:max_per_sitemap]
           close!
         end
         super
