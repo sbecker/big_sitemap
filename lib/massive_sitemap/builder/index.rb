@@ -8,6 +8,14 @@ module MassiveSitemap
         :xmlns => 'http://www.sitemaps.org/schemas/sitemap/0.9'
       }
 
+      def initialize(writer, options = {}, &block)
+        super(writer, options) do
+          writer.each do |path, last_modified|
+            add path, :last_modified => last_modified
+          end
+        end
+      end
+
       def add_url!(location, attrs = {})
         init!
 

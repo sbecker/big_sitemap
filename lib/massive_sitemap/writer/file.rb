@@ -34,6 +34,13 @@ module MassiveSitemap
         true
       end
 
+      def streams
+        files.map do |path|
+          next if path.include?(options[:index_filename])
+          [::File.basename(path), ::File.stat(path).mtime]
+        end.compact
+      end
+
       private
       def filename
         ::File.join options[:document_full], options[:filename]
@@ -41,6 +48,10 @@ module MassiveSitemap
 
       def tmp_filename
         filename + ".tmp"
+      end
+
+      def files
+        Dir[::File.join(options[:document_full], "*.xml")]
       end
     end
 

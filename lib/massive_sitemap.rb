@@ -48,23 +48,10 @@ module MassiveSitemap
     @options[:writer] = MassiveSitemap::Writer::GzipFile if @options[:gzip]
 
     @writer = @options[:writer].new @options
-
     Builder::Rotating.new(@writer, @options, &block)
-    self
+
+    @writer.options.merge!(:filename => @options[:index_filename], :force_overwrite => true)
+    Builder::Index.new(@writer, @options.merge(:base_url => @options[:index_base_url]))
   end
   module_function :generate
-
-  # Create a sitemap index document
-  def generate_index(files = nil)
-    @writer.options.merge!(:filename => @options[:index_filename], :force_overwrite => true)
-    Builder::Index.new(@writer, @options.merge(:base_url => @options[:index_base_url])) do
-      files ||= Dir[File.join(@options[:document_full], "*.{xml,xml.gz}")]
-      files.each do |path|
-        next if path.include?(@options[:index_filename])
-        add ::File.basename(path), :last_modified => File.stat(path).mtime
-      end
-    end
-    self
-  end
-  module_function :generate_index
 end

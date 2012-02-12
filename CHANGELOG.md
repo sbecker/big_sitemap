@@ -25,3 +25,4 @@
   * added Index generation
   * don't init new writer all the time
   * move inited status to writer
+  * move index build into indexer and resource handling/selection into writer

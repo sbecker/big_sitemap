@@ -23,6 +23,10 @@ module MassiveSitemap
         true
       end
 
+      def streams
+        []
+      end
+
       # API
       def init!(options = {})
         close!
@@ -45,6 +49,10 @@ module MassiveSitemap
 
       def print(string)
         @stream.print(string) if inited?
+      end
+
+      def each(&block)
+        streams.each(&block)
       end
     end
 

@@ -3,6 +3,7 @@ require "spec_helper"
 require "massive_sitemap/writer/gzip_file"
 
 describe MassiveSitemap do
+  let(:index_filename) { 'sitemap_index.xml' }
   let(:filename) { 'sitemap.xml' }
   let(:filename2) { 'sitemap2.xml' }
 
@@ -15,6 +16,7 @@ describe MassiveSitemap do
   end
 
   after do
+    FileUtils.rm(index_filename) rescue nil
     FileUtils.rm(filename) rescue nil
     FileUtils.rm(filename2) rescue nil
   end
@@ -105,17 +107,12 @@ describe MassiveSitemap do
   end
 
   describe "#generate_index" do
-    let(:index_filename) { 'sitemap_index.xml' }
     let(:lastmod) { File.stat(index_filename).mtime.utc.strftime('%Y-%m-%dT%H:%M:%S+00:00') }
-
-    after do
-      FileUtils.rm(index_filename) rescue nil
-    end
 
     it 'includes urls' do
       MassiveSitemap.generate(:base_url => 'test.de/', :indent_by => 0) do
         add "dummy"
-      end.generate_index
+      end
 
       output(index_filename).should include("<sitemap>\n<loc>http://test.de/sitemap.xml</loc>\n<lastmod>#{lastmod}</lastmod>\n</sitemap>")
     end
@@ -123,7 +120,7 @@ describe MassiveSitemap do
     it 'includes index base url' do
       MassiveSitemap.generate(:base_url => 'test.de/', :index_base_url => 'index.de/')  do
         add "dummy"
-      end.generate_index
+      end
 
       output(index_filename).should include("<loc>http://index.de/sitemap.xml</loc>")
     end
@@ -132,7 +129,7 @@ describe MassiveSitemap do
       File.open(index_filename, 'w') {}
       MassiveSitemap.generate(:base_url => 'test.de/', :index_base_url => 'index.de/') do
         add "dummy"
-      end.generate_index
+      end
 
       output(index_filename).should include("<loc>http://index.de/sitemap.xml</loc>")
     end
@@ -146,7 +143,7 @@ describe MassiveSitemap do
       it 'creates sitemap file' do
         MassiveSitemap.generate(:base_url => 'test.de/', :writer => MassiveSitemap::Writer::GzipFile) do
           add "dummy"
-        end.generate_index
+        end
         ::File.exists?(gz_filename(index_filename)).should be_true
       end
     end
