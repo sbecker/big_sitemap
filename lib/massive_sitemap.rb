@@ -46,8 +46,6 @@ module MassiveSitemap
 
     @writer.options.merge!(:filename => @options[:index_filename], :force_overwrite => true)
     Builder::Index.generate(@writer, @options.merge(:url => @options[:index_url]))
-
-    ping( ::File.join(@options[:index_url], @options[:index_filename]) )
   end
   module_function :generate
 

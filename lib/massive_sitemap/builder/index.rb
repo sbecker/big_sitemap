@@ -14,6 +14,15 @@ module MassiveSitemap
             add path, :last_modified => last_modified
           end
         end
+
+      end
+
+      def self.generate(writer, options = {}, &block)
+        index_url(super, writer)
+      end
+
+      def self.index_url(builder, writer)
+        ::File.join(builder.send(:url), writer.options[:filename])
       end
 
       def add_url!(location, attrs = {})

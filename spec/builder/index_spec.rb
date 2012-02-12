@@ -23,4 +23,8 @@ describe MassiveSitemap::Builder::Index do
     writer.should include("<loc>http://test.de/test</loc>")
   end
 
+  it 'returns index_url' do
+    writer = MassiveSitemap::Writer::File.new(:filename => "sitemap_index.xml")
+    MassiveSitemap::Builder::Index.generate(writer, :url => "test.de").should == "http://test.de/sitemap_index.xml"
+  end
 end
