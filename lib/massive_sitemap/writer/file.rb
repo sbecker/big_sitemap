@@ -23,8 +23,8 @@ module MassiveSitemap
         ::File.open(tmp_filename, 'w:ASCII-8BIT')
       end
 
-      def close_stream(stream)
-        stream.close
+      def close_stream(file)
+        file.close
         # Move from tmp_file into acutal file
         ::File.delete(filename) if ::File.exists?(filename)
         ::File.rename(tmp_filename, filename)

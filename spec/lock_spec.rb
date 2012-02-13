@@ -35,7 +35,7 @@ describe MassiveSitemap do
     end
 
     it 'fails if lockfile exists' do
-      ::File.open(lock_file, 'w',) {}
+      ::File.open(lock_file, 'w') {}
       expect do
         MassiveSitemap.lock! do
           puts "Hi"
