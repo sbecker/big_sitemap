@@ -8,12 +8,6 @@ describe MassiveSitemap::Builder::Rotating do
   let(:writer) { MassiveSitemap::Writer::String.new }
   let(:builder) { MassiveSitemap::Builder::Rotating.new(writer) }
 
-  it 'raises error when max_per_sitemap > MAX_URLS' do
-    expect do
-      MassiveSitemap::Builder::Rotating.new(writer, :max_per_sitemap => MassiveSitemap::Builder::Rotating::NUM_URLS.max + 1)
-    end.to raise_error(ArgumentError)
-  end
-
   it 'generates one url' do
     MassiveSitemap::Builder::Rotating.new(writer) do
       add_url! 'test'
@@ -22,7 +16,7 @@ describe MassiveSitemap::Builder::Rotating do
   end
 
   it 'generates two url' do
-    MassiveSitemap::Builder::Rotating.new(writer, :max_per_sitemap => 1) do
+    MassiveSitemap::Builder::Rotating.new(writer, :max_urls => 1) do
       add_url! 'test'
       add_url! 'test2'
     end
@@ -42,7 +36,7 @@ describe MassiveSitemap::Builder::Rotating do
     it 'generates two url' do
       expect do
         expect do
-          MassiveSitemap::Builder::Rotating.new(writer, :max_per_sitemap => 1) do
+          MassiveSitemap::Builder::Rotating.new(writer, :max_urls => 1) do
             add 'test'
             add 'test2'
           end
@@ -54,7 +48,7 @@ describe MassiveSitemap::Builder::Rotating do
       File.open(filename, 'w') {}
       expect do
         expect do
-          MassiveSitemap::Builder::Rotating.new(writer, :max_per_sitemap => 1) do
+          MassiveSitemap::Builder::Rotating.new(writer, :max_urls => 1) do
             begin
               add 'test'
             rescue MassiveSitemap::Writer::File::FileExistsException => e

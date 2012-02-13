@@ -7,16 +7,12 @@ module MassiveSitemap
       NUM_URLS = 1..50_000
 
       OPTS = Base::OPTS.merge(
-        :max_per_sitemap => NUM_URLS.max
+        :max_urls => NUM_URLS.max
       )
 
       def initialize(writer, options = {}, &block)
         @rotations = 0
         @urls      = 0
-
-        if options[:max_per_sitemap] && !NUM_URLS.member?(options[:max_per_sitemap])
-          raise ArgumentError, %Q(":max_per_sitemap" must be greater than #{NUM_URLS.min} and smaller than #{NUM_URLS.max})
-        end
 
         super
       end
@@ -34,7 +30,7 @@ module MassiveSitemap
       end
 
       def add_url!(location, attrs = {})
-        if @urls >= @options[:max_per_sitemap]
+        if @urls >= @options[:max_urls]
           close!
         end
         super

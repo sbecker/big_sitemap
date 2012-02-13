@@ -41,6 +41,10 @@ module MassiveSitemap
       end
       @options[:index_url] ||= @options[:url]
 
+      if @options[:max_urls] && !Builder::Rotating::NUM_URLS.member?(@options[:max_urls])
+        raise ArgumentError, %Q(":max_urls" must be greater than #{NUM_URLS.min} and smaller than #{NUM_URLS.max})
+      end
+
       @options[:writer] = Writer::GzipFile if @options[:gzip]
 
       @writer = @options[:writer].new @options

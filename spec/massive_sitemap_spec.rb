@@ -29,6 +29,12 @@ describe MassiveSitemap do
         end.to raise_error(ArgumentError)
       end
 
+      it 'raises error when max_urls > MAX_URLS' do
+        expect do
+          MassiveSitemap.generate(:max_urls => MassiveSitemap::Builder::Rotating::NUM_URLS.max + 1)
+        end.to raise_error(ArgumentError)
+      end
+
       it "does not create empty sitemap file" do
         expect do
           MassiveSitemap.generate(:url => 'test.de/')

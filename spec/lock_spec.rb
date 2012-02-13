@@ -1,4 +1,4 @@
-require "massive_sitemap/locker"
+require "massive_sitemap/lock"
 
 describe MassiveSitemap do
   describe "lock!" do

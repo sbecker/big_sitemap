@@ -7,7 +7,6 @@
   * updated Docu
   * switch to writer chain
   * add BigSitemap API
-  * add flush! stream to writer ???
   * FileManifest -> read all files into streams take that as reference
 
 ## v2.0.0 - 13-02-2012
