@@ -2,6 +2,7 @@ require 'massive_sitemap/writer/file'
 require 'massive_sitemap/writer/gzip_file'
 require 'massive_sitemap/builder/rotating'
 require 'massive_sitemap/builder/index'
+require 'massive_sitemap/lock'
 require 'massive_sitemap/ping'
 
 # Page at -> <url>
@@ -32,20 +33,22 @@ module MassiveSitemap
   }
 
   def generate(options = {}, &block)
-    @options = DEFAULTS.merge options
+    lock! do
+      @options = DEFAULTS.merge options
 
-    unless @options[:url]
-      raise ArgumentError, 'you must specify ":url" string'
+      unless @options[:url]
+        raise ArgumentError, 'you must specify ":url" string'
+      end
+      @options[:index_url] ||= @options[:url]
+
+      @options[:writer] = Writer::GzipFile if @options[:gzip]
+
+      @writer = @options[:writer].new @options
+      Builder::Rotating.generate(@writer, @options, &block)
+
+      @writer.init!(:filename => @options[:index_filename], :force_overwrite => true)
+      Builder::Index.generate(@writer, @options.merge(:url => @options[:index_url]))
     end
-    @options[:index_url] ||= @options[:url]
-
-    @options[:writer] = Writer::GzipFile if @options[:gzip]
-
-    @writer = @options[:writer].new @options
-    Builder::Rotating.generate(@writer, @options, &block)
-
-    @writer.init!(:filename => @options[:index_filename], :force_overwrite => true)
-    Builder::Index.generate(@writer, @options.merge(:url => @options[:index_url]))
   end
   module_function :generate
 

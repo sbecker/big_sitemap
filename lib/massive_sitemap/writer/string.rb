@@ -7,11 +7,7 @@ module MassiveSitemap
   module Writer
 
     class String < Base
-
-      def open_stream
-        @string ||= StringIO.new
-      end
-
+      # accessors to conent, mainly used in tests
       def to_s
         @string.string rescue ""
       end
@@ -22,6 +18,11 @@ module MassiveSitemap
 
       def include?(other_string)
         to_s.include?(other_string)
+      end
+
+      protected
+      def open_stream
+        @string ||= StringIO.new
       end
     end
 

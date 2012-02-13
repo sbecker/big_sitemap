@@ -11,22 +11,6 @@ module MassiveSitemap
         @stream  = nil
       end
 
-      # Interface
-      def open_stream
-        @string ||= StringIO.new
-      end
-
-      def close_stream(stream)
-      end
-
-      def init?
-        true
-      end
-
-      def streams
-        []
-      end
-
       # API
       def init!(options = {})
         close!
@@ -53,6 +37,35 @@ module MassiveSitemap
 
       def each(&block)
         streams.each(&block)
+      end
+
+      def current
+        stream
+      end
+
+      # def flush!
+      #  @streams = []
+      # end
+
+      # Interface
+      protected
+      def open_stream
+        @string ||= StringIO.new
+      end
+
+      def close_stream(stream)
+      end
+
+      def init?
+        true
+      end
+
+      def streams
+        @streams ||= []
+      end
+
+      def stream
+        nil
       end
     end
 

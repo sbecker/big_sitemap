@@ -13,9 +13,9 @@ module MassiveSitemap
         :root            => '.',
         :force_overwrite => false,
         :filename        => "sitemap.xml",
-        :index_filename  => "sitemap_index.xml",
       )
 
+      protected
       def open_stream
         ::File.dirname(tmp_filename).tap do |dir|
           FileUtils.mkdir_p(dir) unless ::File.exists?(dir)
@@ -39,9 +39,12 @@ module MassiveSitemap
 
       def streams
         files.map do |path|
-          next if path.include?(options[:index_filename])
           [::File.basename(path), ::File.stat(path).mtime]
         end.compact
+      end
+
+      def stream
+        options[:filename]
       end
 
       private

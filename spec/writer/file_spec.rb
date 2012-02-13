@@ -47,13 +47,13 @@ describe MassiveSitemap::Writer::File do
     end
   end
 
-  it 'create file' do
+  it 'creates file' do
     expect do
       writer.close!
     end.to change { File.exists?(filename) }.to(true)
   end
 
-  it 'create second file on rotation' do
+  it 'creates second file on rotation' do
     expect do
       expect do
         writer.close!
@@ -63,19 +63,19 @@ describe MassiveSitemap::Writer::File do
     end.to change { File.exists?(filename2) }.to(true)
   end
 
-  it 'write into file' do
+  it 'writes into file' do
     writer.print 'test'
     writer.close!
     `cat '#{filename}'`.should == "test"
   end
 
-  it 'init new file closes current' do
+  it 'inits new file closes current' do
     writer.print 'test'
     writer.init!(:filename => filename2)
     `cat '#{filename}'`.should == "test"
   end
 
-  it 'write into second file' do
+  it 'writes into second file' do
     writer.print 'test'
     writer.init!(:filename => filename2)
     writer.print 'test2'
@@ -83,13 +83,9 @@ describe MassiveSitemap::Writer::File do
     `cat '#{filename2}'`.should == "test2"
   end
 
-  context "opening write file" do
+  context "file exists" do
     before do
       File.open(filename, 'w') {}
-    end
-
-    after do
-      FileUtils.rm(filename) rescue nil
     end
 
     it 'raises when file exits' do
@@ -99,10 +95,11 @@ describe MassiveSitemap::Writer::File do
       end.to raise_error(MassiveSitemap::Writer::File::FileExistsException)
     end
 
-    it 'raises when file exits' do
+    it "dosn't raise when overwrite set" do
       writer = MassiveSitemap::Writer::File.new(:force_overwrite => true)
       expect do
         writer.init!
+        writer.close!
       end.to_not raise_error(MassiveSitemap::Writer::File::FileExistsException)
     end
   end

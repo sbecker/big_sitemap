@@ -7,6 +7,8 @@
   * updated Docu
   * switch to writer chain
   * add BigSitemap API
+  * add flush! stream to writer ???
+  * FileManifest -> read all files into streams take that as reference
 
 ## v2.0.0 - 13-02-2012
   _inital release_
@@ -26,3 +28,4 @@
   * manifest handling:
   * moved Amazon S3 integration to [massive_sitemap-writer-s3](https://github.com/rngtng/massive_sitemap-writer-s3)
   * updated/fixed Ping
+  * move LockingFile into MassiveSitemap scope
