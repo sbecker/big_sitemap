@@ -60,36 +60,36 @@ describe MassiveSitemap::Builder::Rotating do
     end
   end
 
-  describe "#filename_with_rotation" do
+  describe "#with_rotation" do
     context "keeps filename" do
       it "rotation is zero" do
-        builder.send(:filename_with_rotation, "sitemap.xml").should == "sitemap.xml"
+        builder.send(:with_rotation, "sitemap.xml").should == "sitemap.xml"
       end
 
       it "rotation is zero" do
-        builder.send(:filename_with_rotation, "sitemap2.xml").should == "sitemap2.xml"
+        builder.send(:with_rotation, "sitemap2.xml").should == "sitemap2.xml"
       end
 
       it "rotation is zero" do
-        builder.send(:filename_with_rotation, "sitemap.xml", nil).should == "sitemap.xml"
+        builder.send(:with_rotation, "sitemap.xml", nil).should == "sitemap.xml"
       end
 
       it "rotation is nil" do
-        builder.send(:filename_with_rotation, "sitemap.xml", 0).should == "sitemap.xml"
+        builder.send(:with_rotation, "sitemap.xml", 0).should == "sitemap.xml"
       end
     end
 
     context "rotation is 1" do
       it "add prefix" do
-        builder.send(:filename_with_rotation, "sitemap.xml", 1).should == "sitemap-1.xml"
+        builder.send(:with_rotation, "sitemap.xml", 1).should == "sitemap-1.xml"
       end
 
       it "rotation is zero" do
-        builder.send(:filename_with_rotation, "sitemap-1.xml", 1).should == "sitemap-1.xml"
+        builder.send(:with_rotation, "sitemap-1.xml", 1).should == "sitemap-1.xml"
       end
 
       it "rotation is zero" do
-        builder.send(:filename_with_rotation, "sitemap-user.xml", 1).should == "sitemap-user-1.xml"
+        builder.send(:with_rotation, "sitemap-user.xml", 1).should == "sitemap-user-1.xml"
       end
     end
   end

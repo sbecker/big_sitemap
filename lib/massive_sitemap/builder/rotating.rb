@@ -21,8 +21,8 @@ module MassiveSitemap
       # with same file name but -<counter> appendend
       def init_writer!(writer_options = {})
         unless @writer.inited?
-          filename = filename_with_rotation(@writer.options[:filename], @rotations)
-          @rotations += 1
+          filename = with_rotation(@writer.options[:filename], @rotations)
+          @rotations += 1 #
           super(writer_options.merge(:filename => filename))
         end
       end
@@ -37,7 +37,7 @@ module MassiveSitemap
       end
 
       private
-      def filename_with_rotation(filename, rotation = nil)
+      def with_rotation(filename, rotation = nil)
         filename, _, ext = split_filename(filename)
         rotation = (rotation.to_i > 0) ? "-#{rotation}" : nil
         [filename, rotation, ext].join
