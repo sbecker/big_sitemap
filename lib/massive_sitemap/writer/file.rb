@@ -37,13 +37,13 @@ module MassiveSitemap
         true
       end
 
-      def streams
+      def stream_ids
         files.map do |path|
           [::File.basename(path), ::File.stat(path).mtime]
         end.compact
       end
 
-      def stream
+      def stream_id
         options[:filename]
       end
 

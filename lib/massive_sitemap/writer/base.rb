@@ -36,16 +36,12 @@ module MassiveSitemap
       end
 
       def each(&block)
-        streams.each(&block)
+        stream_ids.each(&block)
       end
 
       def current
-        stream
+        stream_id
       end
-
-      # def flush!
-      #  @streams = []
-      # end
 
       # Interface
       protected
@@ -60,11 +56,11 @@ module MassiveSitemap
         true
       end
 
-      def streams
-        @streams ||= []
+      def stream_ids
+        @stream_ids ||= []
       end
 
-      def stream
+      def stream_id
         nil
       end
     end

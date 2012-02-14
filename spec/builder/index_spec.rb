@@ -9,7 +9,7 @@ describe MassiveSitemap::Builder::Index do
   let(:writer) { MassiveSitemap::Writer::String.new }
 
   before do
-    writer.stub!(:streams).and_return(['test'])
+    writer.stub!(:stream_ids).and_return(['test'])
   end
 
   it 'generates one url' do
