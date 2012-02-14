@@ -69,10 +69,11 @@ describe MassiveSitemap::Writer::File do
     `cat '#{filename}'`.should == "test"
   end
 
-  it 'inits new file closes current' do
-    writer.print 'test'
-    writer.init!(:filename => filename2)
-    `cat '#{filename}'`.should == "test"
+  it 'inits new file does not closes current' do
+    expect do
+      writer.print 'test'
+      writer.init!(:filename => filename2)
+    end.to_not change { File.exists?(filename) }
   end
 
   it 'writes into second file' do
