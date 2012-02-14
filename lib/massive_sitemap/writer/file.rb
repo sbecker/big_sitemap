@@ -30,11 +30,11 @@ module MassiveSitemap
         # Move from tmp_file into acutal file
         ::File.delete(filename) if ::File.exists?(filename)
         ::File.rename(tmp_filename, filename)
-        options[:filename] = with_rotation(options[:filename])
+        @options[:filename] = with_rotation(@options[:filename])
       end
 
       def init?
-        if !options[:force_overwrite] && ::File.exists?(filename)
+        if !@options[:force_overwrite] && ::File.exists?(filename)
           raise FileExistsException, "Can not create file: #{filename} exits"
         end
         true
@@ -52,7 +52,7 @@ module MassiveSitemap
 
       private
       def filename
-        ::File.join options[:root], options[:filename]
+        ::File.join @options[:root], @options[:filename]
       end
 
       def tmp_filename
@@ -60,7 +60,7 @@ module MassiveSitemap
       end
 
       def files
-        Dir[::File.join(options[:root], "*.xml")]
+        Dir[::File.join(@options[:root], "*.xml")]
       end
 
       def with_rotation(filename)

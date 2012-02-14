@@ -4,8 +4,6 @@ module MassiveSitemap
     class Base
       OPTS = {}
 
-      attr_reader :options
-
       def initialize(options = {})
         @options = self.class::OPTS.merge(options)
         @stream  = nil
