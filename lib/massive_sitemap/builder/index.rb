@@ -11,6 +11,7 @@ module MassiveSitemap
       def initialize(writer, options = {}, &block)
         super(writer, options) do
           writer.each do |path, last_modified|
+            init_writer!(@options)
             next if writer.current && path.include?(writer.current)
             add path, :last_modified => last_modified
           end
@@ -22,7 +23,7 @@ module MassiveSitemap
       end
 
       def self.index_url(builder, writer)
-        ::File.join(builder.send(:url), writer.current)
+        writer.current && ::File.join(builder.send(:url), writer.current)
       end
 
       def add_url!(location, attrs = {})

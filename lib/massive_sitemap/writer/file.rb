@@ -17,6 +17,8 @@ module MassiveSitemap
 
       protected
       def open_stream
+        #create dir if not exists
+        @stream_id = filename
         ::File.dirname(tmp_filename).tap do |dir|
           FileUtils.mkdir_p(dir) unless ::File.exists?(dir)
         end
@@ -28,6 +30,7 @@ module MassiveSitemap
         # Move from tmp_file into acutal file
         ::File.delete(filename) if ::File.exists?(filename)
         ::File.rename(tmp_filename, filename)
+        options[:filename] = with_rotation(options[:filename])
       end
 
       def init?
@@ -44,7 +47,7 @@ module MassiveSitemap
       end
 
       def stream_id
-        options[:filename]
+        @stream_id && ::File.basename(@stream_id)
       end
 
       private
@@ -58,6 +61,15 @@ module MassiveSitemap
 
       def files
         Dir[::File.join(options[:root], "*.xml")]
+      end
+
+      def with_rotation(filename)
+        filename, rotation, ext = split_filename(filename)
+        [filename, "-", rotation.to_i + 1, ext].join
+      end
+
+      def split_filename(filename)
+        filename.to_s.scan(/^([^.]*?)(?:-([0-9]+))?(\..+)?$/).flatten
       end
     end
 

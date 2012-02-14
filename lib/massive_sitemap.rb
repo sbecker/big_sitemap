@@ -47,11 +47,11 @@ module MassiveSitemap
 
       @options[:writer] = Writer::GzipFile if @options[:gzip]
 
-      @writer = @options[:writer].new @options
+      @writer = @options.delete(:writer).new @options
       Builder::Rotating.generate(@writer, @options, &block)
 
-      @writer.init!(:filename => @options[:index_filename], :force_overwrite => true)
-      Builder::Index.generate(@writer, @options.merge(:url => @options[:index_url]))
+      @options.merge!(:filename => @options[:index_filename], :force_overwrite => true, :url => @options[:index_url])
+      Builder::Index.generate(@writer, @options)
     end
   end
   module_function :generate

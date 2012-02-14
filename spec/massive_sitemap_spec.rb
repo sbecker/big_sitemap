@@ -118,8 +118,9 @@ describe MassiveSitemap do
       let(:lastmod) { File.stat(index_filename).mtime.utc.strftime('%Y-%m-%dT%H:%M:%S+00:00') }
 
       it "does not create empty files" do
-        MassiveSitemap.generate(:url => 'test.de/')
-        ::File.exists?(index_filename).should be_false
+        expect do
+          MassiveSitemap.generate(:url => 'test.de/')
+        end.to_not change { ::File.exists?(index_filename) }.from(false)
       end
 
       it 'includes urls' do

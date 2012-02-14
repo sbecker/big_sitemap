@@ -55,72 +55,8 @@ describe MassiveSitemap::Builder::Rotating do
             end
             add 'test2'
           end
-        end.to_not change { File.exists?(filename) }.to(true)
+        end.to_not change { File.exists?(filename) }.from(true)
       end.to change { File.exists?(filename2) }.to(true)
-    end
-  end
-
-  describe "#with_rotation" do
-    context "keeps filename" do
-      it "rotation is zero" do
-        builder.send(:with_rotation, "sitemap.xml").should == "sitemap.xml"
-      end
-
-      it "rotation is zero" do
-        builder.send(:with_rotation, "sitemap2.xml").should == "sitemap2.xml"
-      end
-
-      it "rotation is zero" do
-        builder.send(:with_rotation, "sitemap.xml", nil).should == "sitemap.xml"
-      end
-
-      it "rotation is nil" do
-        builder.send(:with_rotation, "sitemap.xml", 0).should == "sitemap.xml"
-      end
-    end
-
-    context "rotation is 1" do
-      it "add prefix" do
-        builder.send(:with_rotation, "sitemap.xml", 1).should == "sitemap-1.xml"
-      end
-
-      it "rotation is zero" do
-        builder.send(:with_rotation, "sitemap-1.xml", 1).should == "sitemap-1.xml"
-      end
-
-      it "rotation is zero" do
-        builder.send(:with_rotation, "sitemap-user.xml", 1).should == "sitemap-user-1.xml"
-      end
-    end
-  end
-
-  describe "#split_filename" do
-    FILENAMES = {
-      nil                     => ["", nil, nil],
-      ".xml"                  => ["", nil, ".xml"],
-      ".xml.gz"               => ["", nil, ".xml.gz"],
-      "sitemap"               => ["sitemap", nil, nil],
-      "sitemap.xml"           => ["sitemap", nil, ".xml"],
-      "sitemap.xml.gz"        => ["sitemap", nil, ".xml.gz"],
-      "-1.xml"                => ["", "-1", ".xml"],
-      "-1.xml.gz"             => ["", "-1", ".xml.gz"],
-      "sitemap-1"             => ["sitemap", "-1", nil],
-      "sitemap-1.xml"         => ["sitemap", "-1", ".xml"],
-      "sitemap-1.xml.gz"      => ["sitemap", "-1", ".xml.gz"],
-      "-user-1.xml"           => ["-user", "-1", ".xml"],
-      "-user-1.xml.gz"        => ["-user", "-1", ".xml.gz"],
-      "sitemap-user-1"        => ["sitemap-user", "-1", nil],
-      "sitemap-user-1.xml"    => ["sitemap-user", "-1", ".xml"],
-      "sitemap-user-1.xml.gz" => ["sitemap-user", "-1", ".xml.gz"],
-      "sitemap1"              => ["sitemap1", nil, nil],
-      "sitemap1.xml"          => ["sitemap1", nil, ".xml"],
-      "sitemap1.xml.gz"       => ["sitemap1", nil, ".xml.gz"],
-    }
-
-    FILENAMES.each do |filename, expected|
-      it "splits filename #{filename} into #{expected.join(' ')}" do
-        builder.send(:split_filename, filename).should == expected
-      end
     end
   end
 
