@@ -19,19 +19,18 @@ module MassiveSitemap
 
       # On rotation, close current file, and reopen a new one
       # with same file name but -<counter> appendend
-      def init!(&block)
+      def init_writer!(writer_options = {})
         unless @writer.inited?
-          @urls    = 0
           filename = filename_with_rotation(@writer.options[:filename], @rotations)
           @rotations += 1
-          @writer.init! :filename => filename
-          header!(&block)
+          super(writer_options.merge(:filename => filename))
         end
       end
 
       def add_url!(location, attrs = {})
         if @urls >= @options[:max_urls]
           close!
+          @urls = 0
         end
         super
         @urls += 1

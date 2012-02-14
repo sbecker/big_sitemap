@@ -26,7 +26,7 @@ module MassiveSitemap
       end
 
       def add_url!(location, attrs = {})
-        init!
+        init_writer!
 
         tag! 'sitemap' do
           tag! 'loc', location

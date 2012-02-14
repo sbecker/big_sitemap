@@ -35,10 +35,11 @@ module MassiveSitemap
         # don't fail here
       end
 
-      def init!(&block)
+      # implicitly called by add_url!, call explicitly to check if writer can be used
+      def init_writer!(writer_options = {})
         unless @writer.inited?
-          @writer.init!
-          header!(&block)
+          @writer.init!(writer_options)
+          header!
         end
       end
 
@@ -60,7 +61,7 @@ module MassiveSitemap
       end
 
       def add_url!(location, attrs = {})
-        init!
+        init_writer!
 
         tag! 'url' do
           tag! 'loc', location

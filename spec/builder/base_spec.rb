@@ -24,13 +24,13 @@ describe MassiveSitemap::Builder::Base do
     end
 
     it 'generate basic skeleton' do
-      builder.init!
+      builder.init_writer!
       writer.should == header
     end
 
     it 'generate basic skeleton on double init' do
-      builder.init!
-      builder.init!
+      builder.init_writer!
+      builder.init_writer!
       writer.should == header
     end
 
@@ -45,18 +45,11 @@ describe MassiveSitemap::Builder::Base do
       writer.should == ""
     end
 
-    it "same result on double close" do
-      builder.init!
+    it "same result on double close with init" do
+      builder.init_writer!
       builder.close!
       builder.close!
       writer.should == %Q(#{header}\n</urlset>)
-    end
-
-    it "same result on double close" do
-      builder.init! do
-        add "test"
-      end
-      writer.should == %Q(#{header}\n  <url>\n    <loc>/test</loc>\n  </url>\n</urlset>)
     end
   end
 
@@ -81,19 +74,10 @@ describe MassiveSitemap::Builder::Base do
       writer.should == %Q(#{header}\n  <url>\n    <loc>/test</loc>\n  </url>\n</urlset>)
     end
 
-    it 'generate one url with init!' do
+    it 'generate one url with explizit init_writer!' do
       MassiveSitemap::Builder.new(writer) do
-        init!
+        init_writer!
         add 'test'
-      end
-      writer.should == %Q(#{header}\n  <url>\n    <loc>/test</loc>\n  </url>\n</urlset>)
-    end
-
-    it 'generate one url with init! block' do
-      MassiveSitemap::Builder.new(writer) do
-        init! do
-          add 'test'
-        end
       end
       writer.should == %Q(#{header}\n  <url>\n    <loc>/test</loc>\n  </url>\n</urlset>)
     end

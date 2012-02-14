@@ -16,7 +16,7 @@ describe MassiveSitemap::Writer::File do
     let(:root) { "test/test2" }
 
     after do
-      FileUtils.rm_rf(root) rescue nil
+      FileUtils.rm_rf(File.dirname(root)) rescue nil
     end
 
     it 'mkdir_p folder' do
