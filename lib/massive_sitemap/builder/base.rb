@@ -31,8 +31,6 @@ module MassiveSitemap
 
       def add(path, attrs = {})
         add_url! ::File.join(url, path), attrs
-      rescue MassiveSitemap::Writer::File::FileExistsException => e
-        # don't fail here
       end
 
       # implicitly called by add_url!, call explicitly to check if writer can be used

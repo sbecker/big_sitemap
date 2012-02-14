@@ -80,38 +80,38 @@ describe MassiveSitemap do
         output.should include("<loc>http://test.de/track/name</loc>")
       end
 
-      it "doesn't fail for existing file" do
+      it "to fail for existing file" do
         File.open(filename, 'w') {}
         expect do
           MassiveSitemap.generate(:url => 'test.de/') do
             add "/track/name"
           end
-        end.to_not change { File.stat(filename).mtime }
+        end.to raise_error(MassiveSitemap::Writer::File::FileExistsException)
       end
 
       context 'nested generation' do
-        it 'adds url of nested builder' do
+        let(:generate!) do
           MassiveSitemap.generate(:url => 'test.de/') do
-            writer = @writer.class.new(@options.merge(:filename => 'sitemap2.xml'))
-            MassiveSitemap::Builder::Rotating.new(writer, @options) do
+            MassiveSitemap::Builder::Rotating.generate(@writer, @options) do
+              init_writer!(:filename => 'sitemap2.xml')
               add "/set/name"
             end
           end
+        end
+
+        it 'adds url of nested builder' do
+          generate!
+
           output(filename2).should include("<loc>http://test.de/set/name</loc>")
         end
 
         it 'executes block altough first sitemap exists' do
           File.open(filename, 'w') {}
-          MassiveSitemap.generate(:url => 'test.de/') do
-            writer = @writer.class.new(@options.merge(:filename => 'sitemap2.xml'))
-            MassiveSitemap::Builder::Rotating.new(writer, @options) do
-              add "/set/name"
-            end
-          end
+          generate!
+
           output(filename2).should include("<loc>http://test.de/set/name</loc>")
         end
       end
-
     end
 
     context "generate_index" do

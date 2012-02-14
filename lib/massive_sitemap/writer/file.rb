@@ -15,6 +15,10 @@ module MassiveSitemap
         :filename        => "sitemap.xml",
       )
 
+      def rotate
+        @options[:filename] = with_rotation(@options[:filename])
+      end
+
       protected
       def open_stream
         #create dir if not exists
@@ -30,7 +34,7 @@ module MassiveSitemap
         # Move from tmp_file into acutal file
         ::File.delete(filename) if ::File.exists?(filename)
         ::File.rename(tmp_filename, filename)
-        @options[:filename] = with_rotation(@options[:filename])
+        rotate
       end
 
       def init?

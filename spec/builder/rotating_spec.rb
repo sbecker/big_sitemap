@@ -46,14 +46,17 @@ describe MassiveSitemap::Builder::Rotating do
 
     it 'generates two url when file exists' do
       File.open(filename, 'w') {}
+      urls = ['test', 'test2']
       expect do
         expect do
           MassiveSitemap::Builder::Rotating.new(writer, :max_urls => 1) do
-            begin
-              add 'test'
-            rescue MassiveSitemap::Writer::File::FileExistsException => e
+            urls.each do |path|
+              begin
+                add path
+              rescue MassiveSitemap::Writer::File::FileExistsException => e
+                @writer.rotate
+              end
             end
-            add 'test2'
           end
         end.to_not change { File.exists?(filename) }.from(true)
       end.to change { File.exists?(filename2) }.to(true)
