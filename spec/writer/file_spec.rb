@@ -180,35 +180,37 @@ describe MassiveSitemap::Writer::File do
 
   describe "chaos_monkey_stream_ids" do
     let(:writer) {  MassiveSitemap::Writer::File.new }
+    let(:day) { 60 * 60 * 24}
 
     context "one file" do
+
       it { writer.send(:chaos_monkey_stream_ids, %w(sitemap-1.xml), 0).should == [] }
       it { writer.send(:chaos_monkey_stream_ids, %w(sitemap-1.xml), 1).should == %w(sitemap-1.xml) }
 
       it "keeps file for 2 days" do
-        Time.stub!(:now).and_return(Time.parse("1-1-2012").utc)
+        Time.stub!(:now).and_return(1 * day)
         writer.send(:chaos_monkey_stream_ids, %w(sitemap-1.xml), 2).should == []
       end
 
       it "deletes file on snd day" do
-        Time.stub!(:now).and_return(Time.parse("2-1-2012").utc)
+        Time.stub!(:now).and_return(2 * day)
         writer.send(:chaos_monkey_stream_ids, %w(sitemap-1.xml), 2).should == %w(sitemap-1.xml)
       end
     end
 
     context "many files" do
       it "keeps file for 2 days" do
-        Time.stub!(:now).and_return(Time.parse("1-1-2012").utc)
+        Time.stub!(:now).and_return(1 * day)
         writer.send(:chaos_monkey_stream_ids, %w(sitemap-1.xml sitemap-2.xml sitemap-3.xml), 2).should == %w(sitemap-2.xml)
       end
 
       it "deletes file on 2nd day" do
-        Time.stub!(:now).and_return(Time.parse("2-1-2012").utc)
+        Time.stub!(:now).and_return(2 * day)
         writer.send(:chaos_monkey_stream_ids, %w(sitemap-1.xml sitemap-2.xml sitemap-3.xml), 2).should == %w(sitemap-1.xml sitemap-3.xml)
       end
 
       it "deletes file on 3rd day" do
-        Time.stub!(:now).and_return(Time.parse("3-1-2012").utc)
+        Time.stub!(:now).and_return(3 * day)
         writer.send(:chaos_monkey_stream_ids, %w(sitemap-1.xml sitemap-2.xml sitemap-3.xml), 2).should == %w(sitemap-2.xml)
       end
     end
