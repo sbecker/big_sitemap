@@ -17,7 +17,10 @@ module MassiveSitemap
 
       def initialize(options = {})
         super
-        @files = Dir[::File.join(@options[:root], "*#{::File.extname(filename)}")]
+        @stream_ids = {}
+        Dir[::File.join(@options[:root], "*#{::File.extname(filename)}")].each do |path|
+          add_stream_id(path)
+        end
       end
 
       protected
@@ -35,12 +38,12 @@ module MassiveSitemap
         # Move from tmp_file into acutal file
         ::File.delete(filename) if ::File.exists?(filename)
         ::File.rename(tmp_filename, filename)
-        @files << filename
+        add_stream_id(filename)
         rotate
       end
 
       def init?
-        if !@options[:force_overwrite] && @files.include?(filename)
+        if !@options[:force_overwrite] && find_stream_id(filename)
           error_message = "Can not create file: #{filename} exits"
           rotate #push next possible filename
           raise FileExistsException, error_message
@@ -48,10 +51,13 @@ module MassiveSitemap
         true
       end
 
-      def stream_ids
-        @files.map do |path|
-          [::File.basename(path), ::File.stat(path).mtime]
-        end.compact
+      # Keep state of Files
+      def find_stream_id(path)
+        @stream_ids.keys.include?(::File.basename(path))
+      end
+
+      def add_stream_id(path)
+        @stream_ids[::File.basename(path)] = ::File.stat(path).mtime
       end
 
       def stream_id
