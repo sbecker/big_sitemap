@@ -54,7 +54,6 @@ describe MassiveSitemap::Builder::Rotating do
               begin
                 add path
               rescue MassiveSitemap::Writer::File::FileExistsException => e
-                @writer.rotate
               end
             end
           end

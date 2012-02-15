@@ -54,15 +54,22 @@ describe MassiveSitemap::Builder::Base do
   end
 
   context "adding content" do
-    it 'seq: generate one url' do
+    it 'generate one url' do
       builder.add 'test'
       builder.close!
+      writer.should == %Q(#{header}\n  <url>\n    <loc>/test</loc>\n  </url>\n</urlset>)
+    end
+
+    it "generate one url when block" do
+      builder.init_writer! do
+        add "test"
+      end
       writer.should == %Q(#{header}\n  <url>\n    <loc>/test</loc>\n  </url>\n</urlset>)
     end
   end
 
   context "as block" do
-    it 'generate basic skeleton' do
+    it 'empty when nothing given' do
       MassiveSitemap::Builder.new(writer)  {}
       writer.should == ""
     end

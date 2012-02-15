@@ -10,8 +10,13 @@ module MassiveSitemap
       end
 
       # API
-      def init!(options = {})
+      def set(options)
         @options.merge!(options)
+        self
+      end
+
+      def init!(options = {})
+        set(options)
         if init?
           @stream = open_stream
         end

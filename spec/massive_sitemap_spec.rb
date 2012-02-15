@@ -92,8 +92,9 @@ describe MassiveSitemap do
       context 'nested generation' do
         let(:generate!) do
           MassiveSitemap.generate(:url => 'test.de/') do
+            @writer.set(:filename => 'sitemap2.xml')
             MassiveSitemap::Builder::Rotating.generate(@writer, @options) do
-              init_writer!(:filename => 'sitemap2.xml')
+              init_writer!
               add "/set/name"
             end
           end

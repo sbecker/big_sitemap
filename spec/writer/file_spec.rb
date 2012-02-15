@@ -12,6 +12,12 @@ describe MassiveSitemap::Writer::File do
     FileUtils.rm(filename2) rescue nil
   end
 
+  describe "set" do
+    it "updates filename" do
+      writer.set(:filename => "test").send(:filename).should == "./test"
+    end
+  end
+
   describe "root" do
     let(:root) { "test/test2" }
 

@@ -9,9 +9,10 @@ module MassiveSitemap
       }
 
       def initialize(writer, options = {}, &block)
+        writer.set(:force_overwrite => true)
         super(writer, options) do
           writer.each do |path, last_modified|
-            init_writer!(@options)
+            init_writer!
             next if writer.current && path.include?(writer.current)
             add path, :last_modified => last_modified
           end

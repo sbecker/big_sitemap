@@ -50,8 +50,8 @@ module MassiveSitemap
       @writer = @options.delete(:writer).new @options
       Builder::Rotating.generate(@writer, @options, &block)
 
-      @options.merge!(:filename => @options[:index_filename], :force_overwrite => true, :url => @options[:index_url])
-      Builder::Index.generate(@writer, @options)
+      @writer.set(:filename => @options[:index_filename])
+      Builder::Index.generate(@writer, @options.merge(:url => @options[:index_url]))
     end
   end
   module_function :generate

@@ -19,10 +19,7 @@ module MassiveSitemap
         @options     = self.class::OPTS.merge(options)
         @opened_tags = []
 
-        if block
-          instance_eval(&block)
-          close!
-        end
+        process(&block)
       end
 
       def self.generate(writer, options = {}, &block)
@@ -34,11 +31,12 @@ module MassiveSitemap
       end
 
       # implicitly called by add_url!, call explicitly to check if writer can be used
-      def init_writer!(writer_options = {})
+      def init_writer!(writer_options = {}, &block)
         unless @writer.inited?
           @writer.init!(writer_options)
           header!
         end
+        process(&block)
       end
 
       def close!(indent = true)
@@ -76,10 +74,7 @@ module MassiveSitemap
           @writer.print content.gsub('&', '&amp;')
           close!(false)
         else
-          if block
-            instance_eval(&block)
-            close!
-          end
+          process(&block)
         end
       end
 
@@ -91,6 +86,13 @@ module MassiveSitemap
       end
 
       private
+      def process(&block)
+        if block
+          instance_eval(&block)
+          close!
+        end
+      end
+
       def url
         schema, host = @options[:url].scan(/^(https?:\/\/)?(.+?)\/?$/).flatten
         "#{schema || 'http://'}#{host}/"

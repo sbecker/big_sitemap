@@ -15,10 +15,6 @@ module MassiveSitemap
         :filename        => "sitemap.xml",
       )
 
-      def rotate
-        @options[:filename] = with_rotation(@options[:filename])
-      end
-
       protected
       def open_stream
         #create dir if not exists
@@ -39,7 +35,9 @@ module MassiveSitemap
 
       def init?
         if !@options[:force_overwrite] && ::File.exists?(filename)
-          raise FileExistsException, "Can not create file: #{filename} exits"
+          error_message = "Can not create file: #{filename} exits"
+          rotate #push next possible filename
+          raise FileExistsException, error_message
         end
         true
       end
@@ -65,6 +63,10 @@ module MassiveSitemap
 
       def files
         Dir[::File.join(@options[:root], "*.xml")]
+      end
+
+      def rotate
+        @options[:filename] = with_rotation(@options[:filename])
       end
 
       def with_rotation(filename)
