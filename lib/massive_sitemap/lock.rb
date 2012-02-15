@@ -1,7 +1,8 @@
+# Copyright (c) 2012, SoundCloud Ltd., Tobias Bielohlawek
+
 require 'fileutils'
 
-# Create Lock
-
+# Simple locker to make sure  no second process is running in paralell
 module MassiveSitemap
   LOCK_FILE = 'generator.lock'
 

@@ -1,3 +1,5 @@
+# Copyright (c) 2012, SoundCloud Ltd., Tobias Bielohlawek
+
 require 'massive_sitemap/writer/file'
 require 'massive_sitemap/writer/gzip_file'
 require 'massive_sitemap/builder/rotating'
@@ -5,27 +7,29 @@ require 'massive_sitemap/builder/index'
 require 'massive_sitemap/lock'
 require 'massive_sitemap/ping'
 
-# Page at -> <url>
-# http://example.de/dir/
-
-# Index at -> <index_url>
-# http://sitemap.example.de/index-dir/
-
-# Save at -> <root>
-# /root/dir/ ->  <document_root>/<document_path>
+# MassiveSitemap
+# Example Standard setup of  a writer, rotating and index builder.
+# Common parameters:
+#  required:
+#   :url  - Url of your website e.g http://example.de/dir/
+#
+#  optional:
+#   :index_url - Url of your index website e.g http://example.de/sitemap
+#   :root  - directory where files get written to e.g. /var/sitemap
+#   :gzip - wether to gzip files or not
+#   :writer - custom wirter
 
 module MassiveSitemap
   DEFAULTS = {
     # global
     :index_url       => nil,
+    :index_filename  => "sitemap_index.xml",
     :gzip            => false,
-    :writer          => MassiveSitemap::Writer::File,
 
     # writer
     :root            => '.',
     :force_overwrite => false,
     :filename        => "sitemap.xml",
-    :index_filename  => "sitemap_index.xml",
 
     # builder
     :url             => nil,
@@ -37,18 +41,18 @@ module MassiveSitemap
       @options = DEFAULTS.merge options
 
       unless @options[:url]
-        raise ArgumentError, 'you must specify ":url" string'
+        raise ArgumentError, %Q(":url" not given)
       end
       @options[:index_url] ||= @options[:url]
 
       if @options[:max_urls] && !Builder::Rotating::NUM_URLS.member?(@options[:max_urls])
-        raise ArgumentError, %Q(":max_urls" must be greater than #{NUM_URLS.min} and smaller than #{NUM_URLS.max})
+        raise ArgumentError, %Q(":max_urls" must be greater than #{Builder::Rotating::NUM_URLS.min} and smaller than #{Builder::Rotating::NUM_URLS.max})
       end
 
-      @options[:writer] = Writer::GzipFile if @options[:gzip]
+      @writer   = @options.delete(:writer)
+      @writer ||= (@options.delete(:gzip) ? Writer::GzipFile : Writer::File).new
 
-      @writer = @options.delete(:writer).new @options
-      Builder::Rotating.generate(@writer, @options, &block)
+      Builder::Rotating.generate(@writer.set(@options), @options, &block)
 
       @writer.set(:filename => @options[:index_filename])
       Builder::Index.generate(@writer, @options.merge(:url => @options[:index_url]))

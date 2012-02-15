@@ -1,6 +1,9 @@
+# Copyright (c) 2012, SoundCloud Ltd., Tobias Bielohlawek
+
 require 'cgi'
 require 'open-uri'
 
+# Ping Search Engines to pull the latest update
 module MassiveSitemap
   ENGINES_URLS = {
     :google => 'http://www.google.com/webmasters/tools/ping?sitemap=%s',

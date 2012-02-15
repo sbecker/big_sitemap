@@ -1,7 +1,10 @@
-require 'zlib'
+# Copyright (c) 2012, SoundCloud Ltd., Tobias Bielohlawek
 
+require 'zlib'
 require "massive_sitemap/writer/file"
-# Write into GZipped File
+
+# MassiveSitemap Writer GzipFile
+# Extension to file writer for gzip support
 
 module MassiveSitemap
   module Writer

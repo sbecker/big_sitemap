@@ -1,3 +1,5 @@
+# Copyright (c) 2012, SoundCloud Ltd., Tobias Bielohlawek
+
 require 'stringio'
 require "massive_sitemap/writer/base"
 

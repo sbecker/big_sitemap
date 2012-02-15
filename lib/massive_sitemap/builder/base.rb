@@ -1,3 +1,5 @@
+# Copyright (c) 2012, SoundCloud Ltd., Tobias Bielohlawek
+
 # MassiveSitemap Builder
 # The purpose of a builder is create the XML files: continaing header and all other tag (with attributes).
 #

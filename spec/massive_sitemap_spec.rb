@@ -57,7 +57,7 @@ describe MassiveSitemap do
 
         it 'takes custom writer' do
           expect do
-            MassiveSitemap.generate(:url => 'test.de/', :writer => MassiveSitemap::Writer::GzipFile) do
+            MassiveSitemap.generate(:url => 'test.de/', :writer => MassiveSitemap::Writer::GzipFile.new) do
               add "dummy"
             end
           end.to change { ::File.exists?(gz_filename) }.to(true)
@@ -157,7 +157,7 @@ describe MassiveSitemap do
 
         it 'creates sitemap file' do
           expect do
-            MassiveSitemap.generate(:url => 'test.de/', :writer => MassiveSitemap::Writer::GzipFile) do
+            MassiveSitemap.generate(:url => 'test.de/', :writer => MassiveSitemap::Writer::GzipFile.new) do
               add "dummy"
             end
           end.to change { ::File.exists?(gz_filename(index_filename)) }.to(true)

@@ -1,3 +1,5 @@
+# Copyright (c) 2012, SoundCloud Ltd., Tobias Bielohlawek
+
 require "massive_sitemap/builder/base"
 
 module MassiveSitemap

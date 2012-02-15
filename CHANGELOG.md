@@ -4,10 +4,11 @@
 
 ## v2.0.x - ???
 
-  * updated Docu
+  * update Docu
   * switch to writer chain
+     * move manifest to it's own writer
+     * nested writing
   * add BigSitemap API
-  * support nested writing
 
 ## v2.0.0 - 13-02-2012
   _inital release_

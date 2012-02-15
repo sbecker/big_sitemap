@@ -1,7 +1,10 @@
+# Copyright (c) 2012, SoundCloud Ltd., Tobias Bielohlawek
+
 require 'fileutils'
 require 'massive_sitemap/writer/base'
 
-# Write into File
+# MassiveSitemap Writer File
+# Extension to base writer for writing into file(s).
 
 module MassiveSitemap
   module Writer

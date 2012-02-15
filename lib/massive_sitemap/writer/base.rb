@@ -1,3 +1,5 @@
+# Copyright (c) 2012, SoundCloud Ltd., Tobias Bielohlawek
+
 # MassiveSitemap Writer
 # The purpose of a writer is to store the written data, and to keep the state of existing data.
 # It offers an API to which a builder can talk to, and a Interface which other writers have to implement
