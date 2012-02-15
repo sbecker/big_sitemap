@@ -18,10 +18,6 @@ module MassiveSitemap
       def filename
         super + ".gz"
       end
-
-      def files
-        Dir[::File.join(@options[:root], "*.xml.gz")]
-      end
     end
   end
 end

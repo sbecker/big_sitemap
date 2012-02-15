@@ -15,6 +15,11 @@ module MassiveSitemap
         :filename        => "sitemap.xml",
       )
 
+      def initialize(options = {})
+        super
+        @files = Dir[::File.join(@options[:root], "*#{::File.extname(filename)}")]
+      end
+
       protected
       def open_stream
         #create dir if not exists
@@ -30,11 +35,12 @@ module MassiveSitemap
         # Move from tmp_file into acutal file
         ::File.delete(filename) if ::File.exists?(filename)
         ::File.rename(tmp_filename, filename)
+        @files << filename
         rotate
       end
 
       def init?
-        if !@options[:force_overwrite] && ::File.exists?(filename)
+        if !@options[:force_overwrite] && @files.include?(filename)
           error_message = "Can not create file: #{filename} exits"
           rotate #push next possible filename
           raise FileExistsException, error_message
@@ -43,7 +49,7 @@ module MassiveSitemap
       end
 
       def stream_ids
-        files.map do |path|
+        @files.map do |path|
           [::File.basename(path), ::File.stat(path).mtime]
         end.compact
       end
@@ -59,10 +65,6 @@ module MassiveSitemap
 
       def tmp_filename
         filename + ".tmp"
-      end
-
-      def files
-        Dir[::File.join(@options[:root], "*.xml")]
       end
 
       def rotate

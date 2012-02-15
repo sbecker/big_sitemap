@@ -1,3 +1,6 @@
+# MassiveSitemap Builder
+# The purpose of a builder is create the XML files: continaing header and all other tag (with attributes).
+#
 module MassiveSitemap
   module Builder
 
@@ -22,10 +25,12 @@ module MassiveSitemap
         process(&block)
       end
 
+      # alias for .new
       def self.generate(writer, options = {}, &block)
         self.new(writer, options, &block)
       end
 
+      # add url, prefix with given base_url
       def add(path, attrs = {})
         add_url! ::File.join(url, path), attrs
       end
@@ -39,6 +44,7 @@ module MassiveSitemap
         process(&block)
       end
 
+      # close a tag, if last one, close writer too
       def close!(indent = true)
         if name = @opened_tags.pop
           @writer.print "\n" + ' ' * @options[:indent_by] * @opened_tags.size if indent

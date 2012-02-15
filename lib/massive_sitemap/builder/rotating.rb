@@ -1,5 +1,4 @@
 require "massive_sitemap/builder/base"
-# writer only has print and puts as interface
 
 module MassiveSitemap
   module Builder

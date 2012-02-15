@@ -7,14 +7,16 @@ describe MassiveSitemap::Writer::GzipFile do
 
   let(:writer) { MassiveSitemap::Writer::GzipFile.new.tap { |w| w.init! } }
 
-  after do
-    writer.each { |path| FileUtils.rm(path.first) rescue nil }
-  end
+  context "without root" do
+    after do
+      writer.each { |path| FileUtils.rm(path.first) }
+    end
 
-  it 'creates gzip file' do
-    expect do
-      writer.close!
-    end.to change { File.exists?(gz_filename) }.to(true)
+    it 'creates gzip file' do
+      expect do
+        writer.close!
+      end.to change { ::File.exists?(gz_filename) }.to(true)
+    end
   end
 
   context "with root" do
@@ -29,7 +31,7 @@ describe MassiveSitemap::Writer::GzipFile do
     it 'creates gzip file in document root' do
       expect do
         writer.close!
-      end.to change { File.exists?("sitemap/#{gz_filename}") }.to(true)
+      end.to change { ::File.exists?("sitemap/#{gz_filename}") }.to(true)
     end
   end
 end

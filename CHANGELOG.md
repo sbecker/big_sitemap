@@ -7,7 +7,7 @@
   * updated Docu
   * switch to writer chain
   * add BigSitemap API
-  * FileManifest -> read all files into streams take that as reference
+  * support nested writing
 
 ## v2.0.0 - 13-02-2012
   _inital release_
@@ -28,3 +28,5 @@
   * moved Amazon S3 integration to [massive_sitemap-writer-s3](https://github.com/rngtng/massive_sitemap-writer-s3)
   * updated/fixed Ping
   * move LockingFile into MassiveSitemap scope
+  * FileManifest -> read all files into streams take that as reference
+
