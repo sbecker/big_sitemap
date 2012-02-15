@@ -17,10 +17,7 @@ module MassiveSitemap
 
       def initialize(options = {})
         super
-        @stream_ids = {}
-        Dir[::File.join(@options[:root], "*#{::File.extname(filename)}")].each do |path|
-          add_stream_id(path)
-        end
+        init_stream_ids
       end
 
       protected
@@ -52,12 +49,55 @@ module MassiveSitemap
       end
 
       # Keep state of Files
+      def init_stream_ids
+        @stream_ids = {}
+        load_stream_ids
+
+        if @options[:partial_update]
+          delete_stream_ids upper_stream_ids(@stream_ids.keys)
+        end
+
+        if (keep_file_for = @options[:keep_file_for].to_i) > 0
+          delete_stream_ids chaos_monkey_stream_ids(@stream_ids.keys.sort, keep_file_for)
+        end
+      end
+
+      def load_stream_ids
+        Dir[::File.join(@options[:root], "*#{::File.extname(filename)}")].each do |path|
+          add_stream_id(path, ::File.stat(path).mtime)
+        end
+      end
+
+      def upper_stream_ids(stream_id_keys)
+        {}.tap do |cluster|
+          stream_id_keys.each do |path|
+            filename, rotation,  ext = split_filename(path)
+            _,        rotation2, _   = split_filename(cluster[filename])
+            if rotation.to_i >= rotation2.to_i
+              cluster[filename] = path
+            end
+          end
+        end.values
+      end
+
+      def chaos_monkey_stream_ids(stream_id_keys, days)
+        return [] if days < 1
+        offset = Time.now.to_i / (24 * 60 * 60)
+        (0...stream_id_keys.size).step(days).map do |index|
+          stream_id_keys.at((offset % days) + index)
+        end.compact
+      end
+
+      def delete_stream_ids(to_delete)
+        @stream_ids.delete_if { |key, value| to_delete.include?(key) }
+      end
+
       def find_stream_id(path)
         @stream_ids.keys.include?(::File.basename(path))
       end
 
-      def add_stream_id(path)
-        @stream_ids[::File.basename(path)] = ::File.stat(path).mtime
+      def add_stream_id(path, last_modified = Time.now)
+        @stream_ids[::File.basename(path)] = last_modified
       end
 
       def stream_id
@@ -85,6 +125,7 @@ module MassiveSitemap
       def split_filename(filename)
         filename.to_s.scan(/^([^.]*?)(?:-([0-9]+))?(\..+)?$/).flatten
       end
+
     end
 
   end

@@ -1,4 +1,5 @@
 require "spec_helper"
+require "time"
 
 require "massive_sitemap/writer/file"
 
@@ -168,4 +169,49 @@ describe MassiveSitemap::Writer::File do
       end
     end
   end
+
+  describe "upper_stream_ids" do
+    let(:writer) {  MassiveSitemap::Writer::File.new }
+
+    it { writer.send(:upper_stream_ids, %w(sitemap-1.xml)).should == %w(sitemap-1.xml) }
+    it { writer.send(:upper_stream_ids, %w(sitemap-2.xml sitemap-1.xml)).should == %w(sitemap-2.xml) }
+    it { writer.send(:upper_stream_ids, %w(sitemap.xml sitemap_user-1.xml)).should == %w(sitemap.xml sitemap_user-1.xml) }
+  end
+
+  describe "chaos_monkey_stream_ids" do
+    let(:writer) {  MassiveSitemap::Writer::File.new }
+
+    context "one file" do
+      it { writer.send(:chaos_monkey_stream_ids, %w(sitemap-1.xml), 0).should == [] }
+      it { writer.send(:chaos_monkey_stream_ids, %w(sitemap-1.xml), 1).should == %w(sitemap-1.xml) }
+
+      it "keeps file for 2 days" do
+        Time.stub!(:now).and_return(Time.parse("1-1-2012"))
+        writer.send(:chaos_monkey_stream_ids, %w(sitemap-1.xml), 2).should == []
+      end
+
+      it "deletes file on snd day" do
+        Time.stub!(:now).and_return(Time.parse("2-1-2012"))
+        writer.send(:chaos_monkey_stream_ids, %w(sitemap-1.xml), 2).should == %w(sitemap-1.xml)
+      end
+    end
+
+    context "many files" do
+      it "keeps file for 2 days" do
+        Time.stub!(:now).and_return(Time.parse("1-1-2012"))
+        writer.send(:chaos_monkey_stream_ids, %w(sitemap-1.xml sitemap-2.xml sitemap-3.xml), 2).should == %w(sitemap-2.xml)
+      end
+
+      it "deletes file on 2nd day" do
+        Time.stub!(:now).and_return(Time.parse("2-1-2012"))
+        writer.send(:chaos_monkey_stream_ids, %w(sitemap-1.xml sitemap-2.xml sitemap-3.xml), 2).should == %w(sitemap-1.xml sitemap-3.xml)
+      end
+
+      it "deletes file on 3rd day" do
+        Time.stub!(:now).and_return(Time.parse("3-1-2012"))
+        writer.send(:chaos_monkey_stream_ids, %w(sitemap-1.xml sitemap-2.xml sitemap-3.xml), 2).should == %w(sitemap-2.xml)
+      end
+    end
+  end
+
 end

@@ -29,4 +29,4 @@
   * updated/fixed Ping
   * move LockingFile into MassiveSitemap scope
   * FileManifest -> read all files into streams take that as reference
-
+  * add test for stream_id delete
