@@ -11,16 +11,14 @@ module MassiveSitemap
         :max_urls => NUM_URLS.max
       )
 
-      def initialize(writer, options = {}, &block)
-        @urls      = 0
-
+      def header!(&block)
+        @urls  = 0
         super
       end
 
       def add_url!(location, attrs = {})
-        if @urls >= @options[:max_urls]
+        if @urls.to_i >= @options[:max_urls]
           close!
-          @urls = 0
         end
         super
         @urls += 1

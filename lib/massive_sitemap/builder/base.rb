@@ -93,7 +93,6 @@ module MassiveSitemap
         @writer.print "<#{name}#{attrs}>"
       end
 
-      private
       def process(&block)
         if block
           instance_eval(&block)

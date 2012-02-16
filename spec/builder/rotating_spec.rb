@@ -60,6 +60,10 @@ describe MassiveSitemap::Builder::Rotating do
         end.to_not change { File.exists?(filename) }.from(true)
       end.to change { File.exists?(filename2) }.to(true)
     end
+
+    it 'reset @url when file ealier closed ' do
+      # todo
+    end
   end
 
 end
