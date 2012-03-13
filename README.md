@@ -3,9 +3,13 @@
 Build painfree sitemaps for websites with millions of pages
 
 MassiveSitemap is a successor project of [BigSitemap](https://github.com/alexrabarts/big_sitemap), a [Sitemap](http://sitemaps.org) generator for websites with millions of pages.
-It implements various generation stategies, e.g. to split large Sitemaps into multiple files, gzip files to minimize bandwidth usage, or incremental updates. It offers API is very similar to _BigSitemap_ and therefor can be set up with just a few lines of code and is compatible with just about any framework.
+It implements various generation stategies, e.g. to split large Sitemaps into multiple files, gzip files to minimize bandwidth usage, or incremental updates. Its API is very similar to _BigSitemap_, can be set up with just a few lines of code and is compatible with just about any framework.
+
 
 ## Usage
+
+A simple usecase which fits most of the standard scenarios:
+
 
 ```ruby
 require 'massive_sitemap'
@@ -17,15 +21,19 @@ MassiveSitemap.ping(index_url)
 
 ```
 
-* clear structure
-* allows extension (S3)
+## Structure
 
-MassiveSitemap - build huge sitemaps painfree. Differential updates keeps generation time short and reduces load on DB. It's heavealy inspired by BigSitemaps and offers compatiable API
+MassiveSitemap is structured in two major parts: `Builder` and `Writer`. Both offer an abstract interface which is tailored to the specific needs.
 
-## Dependencies
+### Builder
+`Builder` keeps all the sitemap structure related logic to build the XML data. `Builder::Index` does the similar for the index structure. `Builder::Rotation` is an extension to make sure no more than 50k urls are written per files, according to sitemap specs.
 
-Obviously depends on a S3 library which [S3 gem](https://github.com/qoobaa/s3)
 
+### Writer
+The `Writer` takes care of the storage. At top level, that's just a string (`Writer::String`), however `Writer::File` stores to files, `Writer::GzipFile` gzips it as well. `Writer` keeps the state of the files and implements various strategies how to update the files.
+
+
+Further extension and customization can easily be done, e.g. a `Writer::S3` [extenstion](https://github.com/rngtng/massive_sitemap-writer-s3) stores the sitemap files to Amazon S3 .
 
 ## Contributing
 
