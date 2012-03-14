@@ -85,10 +85,10 @@ module MassiveSitemap
 
       def chaos_monkey_stream_ids(stream_id_keys, days)
         return [] if days < 1
-        offset = Time.now.to_i / (24 * 60 * 60)
-        (0...stream_id_keys.size).step(days).map do |index|
-          stream_id_keys.at((offset % days) + index)
-        end.compact
+        offset = 1 + Time.now.to_i / (24 * 60 * 60)
+        stream_id_keys.select do |stream_id_key|
+          (stream_id_key.scan(/\d+/).first.to_i + offset) % days == 0
+        end
       end
 
       def delete_stream_ids(to_delete)

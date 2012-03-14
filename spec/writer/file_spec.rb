@@ -179,7 +179,7 @@ describe MassiveSitemap::Writer::File do
   end
 
   describe "chaos_monkey_stream_ids" do
-    let(:writer) {  MassiveSitemap::Writer::File.new }
+    let(:writer) { MassiveSitemap::Writer::File.new }
     let(:day) { 60 * 60 * 24}
 
     context "one file" do
@@ -212,6 +212,11 @@ describe MassiveSitemap::Writer::File do
       it "deletes file on 3rd day" do
         Time.stub!(:now).and_return(3 * day)
         writer.send(:chaos_monkey_stream_ids, %w(sitemap-1.xml sitemap-2.xml sitemap-3.xml), 2).should == %w(sitemap-2.xml)
+      end
+
+      it "deletes file on 3rd day even when new file" do
+        Time.stub!(:now).and_return(3 * day)
+        writer.send(:chaos_monkey_stream_ids, %w(sitemap_tracks.xml sitemap-1.xml sitemap-2.xml sitemap-3.xml), 2).should == %w(sitemap_tracks.xml sitemap-2.xml)
       end
     end
   end
