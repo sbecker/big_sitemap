@@ -10,6 +10,11 @@
      * nested writing
   * add BigSitemap API
 
+## v2.1.0 - 15-07-2012
+  * Ping: added yandex support
+  * Ping: disabled ask (the seem to be down!?)
+  * updated docu for more exmaples
+
 ## v2.0.0 - 13-02-2012
   _inital release_
 
