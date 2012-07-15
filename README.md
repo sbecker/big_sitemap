@@ -8,14 +8,31 @@ It implements various generation stategies, e.g. to split large Sitemaps into mu
 
 ## Usage
 
-A simple usecase which fits most of the standard scenarios:
+A simple usecase which fits most of the standard scenarios. This example adds `http://test.com/about` to the sitemap.
 
 
 ```ruby
 require 'massive_sitemap'
 
-index_url = MassiveSitemap.generate(:url => 'test.de/') do
-  add "dummy"
+index_url = MassiveSitemap.generate(:url => 'test.com') do
+  add "/about"
+end
+MassiveSitemap.ping(index_url)
+
+```
+
+### Using Rails  (ActiveRecord)
+
+This exmaple itterates of the `User` resource and adds each with a `change_frequency`, `last_modified` and `priority` to the sitemap. In case there are more than 50.000 users, the sitemap will be auto-split in multiple files. See
+
+
+```ruby
+require 'massive_sitemap'
+
+index_url = MassiveSitemap.generate(:url => 'test.com') do
+  User.all do |user|
+    add "/users/#{user.id}", :change_frequency => 'weekly', :last_modified => user.updated_at, :priority => 0.9
+  end
 end
 MassiveSitemap.ping(index_url)
 
