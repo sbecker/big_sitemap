@@ -80,6 +80,13 @@ describe MassiveSitemap do
         output.should include("<loc>http://test.de/track/name</loc>")
       end
 
+      it 'adds url with no tryiling root for domain' do
+        MassiveSitemap.generate(:url => 'test.de') do
+          add "/track/name"
+        end
+        output.should include("<loc>http://test.de/track/name</loc>")
+      end
+
       it "to fail for existing file" do
         File.open(filename, 'w') {}
         expect do
@@ -170,7 +177,7 @@ describe MassiveSitemap do
     PINGS = [
       "http://www.google.com/webmasters/tools/ping?sitemap=http%3A%2F%2Ftest.de%2Fsitemap_index.xml",
       "http://www.bing.com/webmaster/ping.aspx?siteMap=http%3A%2F%2Ftest.de%2Fsitemap_index.xml",
-      "http://submissions.ask.com/ping?sitemap=http%3A%2F%2Ftest.de%2Fsitemap_index.xml",
+      "http://webmaster.yandex.ru/wmconsole/sitemap_list.xml?host=http%3A%2F%2Ftest.de%2Fsitemap_index.xml",
     ]
 
     it 'calls all engines' do
