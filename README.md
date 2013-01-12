@@ -23,7 +23,7 @@ MassiveSitemap.ping(index_url)
 
 ### Using Rails  (ActiveRecord)
 
-This exmaple itterates of the `User` resource and adds each with a `change_frequency`, `last_modified` and `priority` to the sitemap. In case there are more than 50.000 users, the sitemap will be auto-split in multiple files.
+This example itterates of the `User` resource and adds each with a `change_frequency`, `last_modified` and `priority` to the sitemap. In case there are more than 50.000 users, the sitemap will be auto-split in multiple files.
 
 ```ruby
 require 'massive_sitemap'
