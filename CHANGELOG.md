@@ -2,7 +2,7 @@
 
 ## vx.x.x - ???
 
-## v2.0.x - ???
+## v2.1.x - ???
 
   * update Docu
   * switch to writer chain
@@ -10,10 +10,14 @@
      * nested writing
   * add BigSitemap API
 
+## v2.1.1 - 15-07-2012
+ * update gems
+ * PR #6: Fixes UTF-8 conversion error with GZIP filewriter #5
+
 ## v2.1.0 - 15-07-2012
   * Ping: added yandex support
-  * Ping: disabled ask (the seem to be down!?)
-  * updated docu for more exmaples
+  * Ping: disabled ask (the seems to be down!?)
+  * updated docu for more examples
 
 ## v2.0.0 - 13-02-2012
   _inital release_
