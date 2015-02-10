@@ -1,4 +1,4 @@
-# MassiveSitemap [![](http://travis-ci.org/rngtng/massive_sitemap.png)](http://travis-ci.org/rngtng/massive_sitemap)
+# MassiveSitemap [![](http://travis-ci.org/rngtng/massive_sitemap.png)](http://travis-ci.org/rngtng/massive_sitemap) [![massive_sitemap Documentation](https://www.omniref.com/ruby/gems/massive_sitemap.png)](https://www.omniref.com/ruby/gems/massive_sitemap)
 
 Build painfree sitemaps for websites with millions of pages
 
